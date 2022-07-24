@@ -2,8 +2,6 @@ import subprocess
 import tempfile
 from typing import List
 
-from rich.text import Text
-
 
 def fzf(choices: List[str], multi=False, key=None) -> List[str]:
     choices.sort(reverse=True, key=key)

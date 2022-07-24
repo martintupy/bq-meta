@@ -1,22 +1,22 @@
+import webbrowser
 from datetime import datetime
 from typing import List, Optional
 
-from bq_meta import const, Config, output
+import readchar
+from bq_meta import const, output
 from bq_meta.bq_client import BqClient
+from bq_meta.config import Config
 from bq_meta.util import bash_util
-from google.cloud.bigquery.schema import SchemaField
 from google.cloud.bigquery import Dataset, Table
+from google.cloud.bigquery.schema import SchemaField
 from rich import box
 from rich.columns import Columns
 from rich.console import Console
-from rich.table import Table
 from rich.live import Live
-from rich.text import Text
 from rich.panel import Panel
-from rich.prompt import Prompt
+from rich.table import Table
+from rich.text import Text
 from rich.tree import Tree
-import readchar
-import webbrowser
 
 
 class MetaService:
@@ -25,23 +25,21 @@ class MetaService:
         self.config = config
         self.bq_client = bq_client
 
-    def get_dataset(self) -> Dataset:
-        project_id = self.pick_project_id()
-        dataset_id = self.pick_dataset_id(project_id)
-        dataset = self.bq_client.client.get_dataset(dataset_id)
+    def get_dataset(self, project_id: Optional[str], dataset_id: Optional[str]) -> Dataset:
+        project_id = project_id if project_id else self.pick_project_id()
+        dataset_id = dataset_id if dataset_id else self.pick_dataset_id(project_id)
+        dataset = self.bq_client.client.get_dataset(f"{project_id}.{dataset_id}")
         return dataset
 
     def get_table(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]) -> Table:
         project_id = project_id if project_id else self.pick_project_id()
         dataset_id = dataset_id if dataset_id else self.pick_dataset_id(project_id)
-        table_id = table_id if table_id else self.pick_table_id(dataset_id)
+        dataset = self.get_dataset(project_id, dataset_id)
+        table_id = table_id if table_id else self.pick_table_id(dataset)
         table = self.bq_client.client.get_table(f"{project_id}.{dataset_id}.{table_id}")
         return table
 
-    def get_table_renderable(
-        self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]
-    ) -> Panel:
-        table = self.get_table(project_id, dataset_id, table_id)
+    def get_table_renderable(self, table: Table) -> Panel:
         group = output.get_table_output(table)
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         panel = Panel(
@@ -54,17 +52,17 @@ class MetaService:
         return panel
 
     def print_table_meta(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]):
-        def loop(panel: Panel, live: Live):
+        def loop(table: Table, panel: Panel, live: Live):
             char = readchar.readchar()
             if char == "r":
-                panel = self.get_table_renderable(project_id, dataset_id, table_id)
+                panel = self.get_table_renderable(table)
                 now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 panel.title = now
                 live.update(panel, refresh=True)
-                loop(panel, live)
+                loop(table, panel, live)
             elif char == "o":
                 live.stop()
-                url = f"https://console.cloud.google.com/bigquery?&ws=!1m5!1m4!4m3!1s{project_id}!2s{dataset_id}!3s{table_id}"
+                url = f"https://console.cloud.google.com/bigquery?&ws=!1m5!1m4!4m3!1s{table.project}!2s{table.dataset_id}!3s{table.table_id}"
                 panel = Panel(
                     Text("Opened browser", style=const.info_style).append(f": {url}", style=const.link_style),
                     border_style=const.border_style,
@@ -77,9 +75,10 @@ class MetaService:
             else:
                 return
 
-        panel = self.get_table_renderable(project_id, dataset_id, table_id)
+        table = self.get_table(project_id, dataset_id, table_id)
+        panel = self.get_table_renderable(table)
         with Live(panel, auto_refresh=False) as live:
-            loop(panel, live)
+            loop(table, panel, live)
 
     def pick_project_id(self) -> Optional[str]:
         project_ids = self.bq_client.list_projects()
@@ -92,9 +91,9 @@ class MetaService:
             dataset_ids.append(dataset.dataset_id)
         return next(iter(bash_util.fzf(dataset_ids)), None)
 
-    def pick_table_id(self, dataset_id: str) -> Optional[str]:
+    def pick_table_id(self, dataset: Dataset) -> Optional[str]:
         table_ids = []
-        tables = list(self.bq_client.client.list_tables(dataset_id))
+        tables = list(self.bq_client.client.list_tables(dataset))
         for table in tables:
             table_ids.append(table.table_id)
         return next(iter(bash_util.fzf(table_ids)), None)

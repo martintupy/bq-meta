@@ -1,4 +1,4 @@
-from bq_meta import BqClient, const
+from bq_meta.bq_client import BqClient, const
 from bq_meta.config import Config
 from bq_meta.util import bash_util
 from rich.console import Console
