@@ -1,3 +1,6 @@
+upload:
+	sh bin/upload.sh
+
 build:
 	sh bin/build.sh
 

@@ -1,8 +1,8 @@
+from typing import List
+
 from bq_meta.bq_client import BqClient, const
 from bq_meta.config import Config
-from bq_meta.util import bash_util
 from rich.console import Console
-from rich.text import Text
 
 
 class ProjectService:
@@ -10,12 +10,13 @@ class ProjectService:
         self.console = console
         self.config = config
         self.bq_client = bq_client
+        self.projects_path = const.BQ_META_PROJECTS
 
-    def set_project(self):
+    def list_projects(self) -> List[str]:
+        projects = open(self.projects_path, "r").read().splitlines()
+        return projects
+
+    def fetch_projects(self):
         projects = self.bq_client.list_projects()
-        project = next(iter(bash_util.fzf(projects)), None)
-        if project:
-            self.config.project = project
-            self.console.print(
-                Text("Project updated", style=const.info_style).append(f": {project}", style=const.darker_style)
-            )
+        with open(self.projects_path, "w") as f:
+            f.write("\n".join(projects))

@@ -4,6 +4,8 @@ from typing import List
 
 import yaml
 
+from bq_meta import const
+
 
 class Config:
     default = {
@@ -22,16 +24,14 @@ class Config:
             "openid",
         ],
         "credentials": None,
-        "project": "",
         "account": "",
     }
 
-    def __init__(self, config_path) -> None:
-        self.config_path = config_path
+    def __init__(self) -> None:
+        self.config_path = const.BQ_META_CONFIG
         self._conf = None
 
     def write_default(self):
-        Path(self.config_path).touch()
         conf = Config.default
         self._save_conf(conf)
 
@@ -46,15 +46,6 @@ class Config:
             with open(self.config_path, "r") as f:
                 self._conf = yaml.safe_load(f)
         return self._conf
-
-    @property
-    def project(self) -> str:
-        return self.conf["project"]
-
-    @project.setter
-    def project(self, project):
-        conf = {**self.conf, "project": project}
-        self._save_conf(conf)
 
     @property
     def client_config(self) -> dict:

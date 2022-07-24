@@ -1,6 +1,6 @@
 # BigQuery Metadata viewer
 
-> "Designed for superusers who value their time"
+> "Interacts with BigQuery metadata much faster"
 
 - quick search through available projects, dataset, tables
 - view table metadata and schema
@@ -33,19 +33,17 @@ bq-meta --init
 ## Examples
 
 ```bash
-Usage: bq-meta [OPTIONS] [SQL]
+Usage: bq-meta [OPTIONS]
 
-  BiqQuery query.
+  BiqQuery metadata
 
 Options:
-  -f, --file FILENAME  File containing SQL
-  -y, --yes            Automatic yes to prompt
-  -h, --history        Search local history
-  -d, --delete         Delete job from history (local & cloud)
-  -i, --info           Show gcloud configuration
-  --clear              Clear local history
-  --sync               Sync history from cloud
-  --init               Initialize bq-meta environment
-  --version            Show the version and exit.
-  --help               Show this message and exit.
+  -p, --project-id TEXT  Project name
+  -d, --dataset-id TEXT  Dataset name
+  -t, --table-id TEXT    Table name
+  --init                 Initialize bq_meta
+  --info                 Print info of currently logged account
+  --fetch-projects       Fetch projects
+  --version              Show the version and exit.
+  --help                 Show this message and exit.
 ```

@@ -6,6 +6,7 @@ import readchar
 from bq_meta import const, output
 from bq_meta.bq_client import BqClient
 from bq_meta.config import Config
+from bq_meta.service.project_service import ProjectService
 from bq_meta.util import bash_util
 from google.cloud.bigquery import Dataset, Table
 from google.cloud.bigquery.schema import SchemaField
@@ -20,10 +21,11 @@ from rich.tree import Tree
 
 
 class MetaService:
-    def __init__(self, console: Console, config: Config, bq_client: BqClient):
+    def __init__(self, console: Console, config: Config, bq_client: BqClient, project_service: ProjectService):
         self.console = console
         self.config = config
         self.bq_client = bq_client
+        self.project_service = project_service
 
     def get_dataset(self, project_id: Optional[str], dataset_id: Optional[str]) -> Dataset:
         project_id = project_id if project_id else self.pick_project_id()
@@ -34,8 +36,7 @@ class MetaService:
     def get_table(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]) -> Table:
         project_id = project_id if project_id else self.pick_project_id()
         dataset_id = dataset_id if dataset_id else self.pick_dataset_id(project_id)
-        dataset = self.get_dataset(project_id, dataset_id)
-        table_id = table_id if table_id else self.pick_table_id(dataset)
+        table_id = table_id if table_id else self.pick_table_id(project_id, dataset_id)
         table = self.bq_client.client.get_table(f"{project_id}.{dataset_id}.{table_id}")
         return table
 
@@ -71,7 +72,7 @@ class MetaService:
                 webbrowser.open(url)
             elif char == "s":
                 live.stop()
-                self.print_schema(project_id, dataset_id, table_id)
+                self.print_schema(table.project, table.dataset_id, table.table_id)
             else:
                 return
 
@@ -81,30 +82,30 @@ class MetaService:
             loop(table, panel, live)
 
     def pick_project_id(self) -> Optional[str]:
-        project_ids = self.bq_client.list_projects()
-        return next(iter(bash_util.fzf(project_ids)), None)
+        project_ids = self.project_service.list_projects()
+        return bash_util.pick_one(project_ids, self.console)
 
     def pick_dataset_id(self, project_id: str) -> Optional[str]:
         dataset_ids = []
         datasets = list(self.bq_client.client.list_datasets(project=project_id))
         for dataset in datasets:
             dataset_ids.append(dataset.dataset_id)
-        return next(iter(bash_util.fzf(dataset_ids)), None)
+        return bash_util.pick_one(dataset_ids, self.console)
 
-    def pick_table_id(self, dataset: Dataset) -> Optional[str]:
+    def pick_table_id(self, project_id: str, dataset_id: str) -> Optional[str]:
         table_ids = []
-        tables = list(self.bq_client.client.list_tables(dataset))
+        tables = list(self.bq_client.client.list_tables(f"{project_id}.{dataset_id}"))
         for table in tables:
             table_ids.append(table.table_id)
-        return next(iter(bash_util.fzf(table_ids)), None)
+        return bash_util.pick_one(table_ids, self.console)
 
     def get_schema_renderable(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]):
         table = self.get_table(project_id, dataset_id, table_id)
         schema = table.schema
         tree = Tree(Text(table.full_table_id, style=const.info_style))
         table = Table(box=box.SIMPLE, show_header=False)
-        MetaService._scheme_table(schema, table)
         MetaService._scheme_tree(schema, tree)
+        MetaService._scheme_table(schema, table)
         return Columns([tree, table])
 
     def print_schema(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]):

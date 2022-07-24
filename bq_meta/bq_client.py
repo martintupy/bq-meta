@@ -7,6 +7,7 @@ from rich.progress import Progress, TextColumn, TimeElapsedColumn
 from rich.text import Text
 
 from bq_meta import const
+import time
 from bq_meta.config import Config
 
 

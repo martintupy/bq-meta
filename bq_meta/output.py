@@ -1,4 +1,3 @@
-
 from google.cloud.bigquery import Table
 from rich.console import Group
 from rich.rule import Rule
@@ -24,6 +23,9 @@ def get_table_output(table: Table) -> Group:
     created = table.created.strftime("%Y-%m-%d %H:%M:%S")
     modified = table.modified.strftime("%Y-%m-%d %H:%M:%S")
     expiry = table.expires.strftime("%Y-%m-%d %H:%M:%S") if table.expires else ""
+    partitioned_by = table.time_partitioning.type_ if table.time_partitioning.type_ else ""
+    partitioned_field = table.time_partitioning.field if table.time_partitioning.field else ""
+    partition_filter = table.require_partition_filter if table.require_partition_filter else ""
     return Group(
         text_tuple("Table ID", table.full_table_id),
         text_tuple("Description", table.description),
@@ -37,9 +39,9 @@ def get_table_output(table: Table) -> Group:
         text_tuple("Last modified", modified),
         text_tuple("Table expiry", expiry),
         Rule(style=const.border_style),
-        text_tuple("Partitioned by", table.time_partitioning.type_),
-        text_tuple("Partitioned on field", table.time_partitioning.field),
-        text_tuple("Partition filter", table.require_partition_filter),
+        text_tuple("Partitioned by", partitioned_by),
+        text_tuple("Partitioned on field", partitioned_field),
+        text_tuple("Partition filter", partition_filter),
         Rule(style=const.border_style),
         text_tuple("Clustered by", table.clustering_fields),
     )
