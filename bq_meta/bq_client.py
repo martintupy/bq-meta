@@ -1,8 +1,6 @@
-from datetime import datetime, timedelta
 from typing import List
 
 from google.cloud.bigquery import Client
-from google.cloud.bigquery.job.query import QueryJob
 from google.oauth2.credentials import Credentials
 from rich.console import Console
 from rich.progress import Progress, TextColumn, TimeElapsedColumn

@@ -5,7 +5,7 @@ from typing import Optional
 import click
 from rich.console import Console, Group, NewLine
 from rich.panel import Panel
-from rich.prompt import Confirm, Prompt
+from rich.prompt import Prompt
 from rich.text import Text
 
 from bq_meta import const, output
