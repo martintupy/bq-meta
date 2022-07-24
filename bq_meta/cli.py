@@ -7,6 +7,7 @@ from rich.console import Console, Group, NewLine
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.text import Text
+from google.cloud.bigquery.table import TableReference
 
 from bq_meta import const, output
 from bq_meta.auth import Auth
@@ -17,6 +18,7 @@ from bq_meta.service.meta_service import MetaService
 
 
 @click.command()
+@click.argument("table", required=False)
 @click.option("-p", "--project-id", help="Project name", default=None)
 @click.option("-d", "--dataset-id", help="Dataset name", default=None)
 @click.option("-t", "--table-id", help="Table name", default=None)
@@ -25,6 +27,7 @@ from bq_meta.service.meta_service import MetaService
 @click.option("--fetch-projects", help="Fetch projects", is_flag=True)
 @click.version_option()
 def cli(
+    table: Optional[str],
     project_id: Optional[str],
     dataset_id: Optional[str],
     table_id: Optional[str],
@@ -32,7 +35,7 @@ def cli(
     info: bool,
     fetch_projects: bool,
 ):
-    """BiqQuery metadata"""
+    """BiqQuery table metadata viewer"""
     ctx = click.get_current_context()
     config = Config()
     console = Console(theme=const.theme, soft_wrap=True)
@@ -57,6 +60,9 @@ def cli(
         ctx.exit()
     elif fetch_projects:
         project_service.fetch_projects()
+    elif table:
+        table_ref = TableReference.from_string(table.replace(":", "."))
+        meta_service.print_table_meta(table_ref.project, table_ref.dataset_id, table_ref.table_id)
     else:
         meta_service.print_table_meta(project_id, dataset_id, table_id)
 

@@ -1,6 +1,6 @@
-# BigQuery Metadata viewer
+# BigQuery metadata viewer
 
-> "Interacts with BigQuery metadata much faster"
+> "Inspect BigQuery metadata faster"
 
 - quick search through available projects, dataset, tables
 - view table metadata and schema
@@ -33,9 +33,9 @@ bq-meta --init
 ## Examples
 
 ```bash
-Usage: bq-meta [OPTIONS]
+Usage: bq_meta [OPTIONS] [TABLE]
 
-  BiqQuery metadata
+  BiqQuery table metadata viewer
 
 Options:
   -p, --project-id TEXT  Project name
