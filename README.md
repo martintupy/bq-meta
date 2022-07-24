@@ -1,6 +1,6 @@
 # BigQuery Metadata viewer
 
-> "Designed for superusers who valuate their time"
+> "Designed for superusers who value their time"
 
 - quick search through available projects, dataset, tables
 - view table metadata and schema
@@ -32,7 +32,7 @@ bq-meta --init
 
 ## Examples
 
-```
+```bash
 Usage: bq-meta [OPTIONS] [SQL]
 
   BiqQuery query.
@@ -49,4 +49,3 @@ Options:
   --version            Show the version and exit.
   --help               Show this message and exit.
 ```
-

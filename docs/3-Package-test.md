@@ -1,9 +1,11 @@
-# Release
+# Package - test
 
-## 1. Build
+https://packaging.python.org/en/latest/tutorials/packaging-projects/
+
+## 1. Install python twine module
 
 ```bash
-python -m build
+python3 -m pip install --upgrade twine
 ```
 
 ## 2. Check

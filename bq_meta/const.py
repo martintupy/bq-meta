@@ -4,12 +4,9 @@ import yaml
 from rich.style import Style
 from rich.theme import Theme
 
-DEFAULT_BQ_META_HOME = f"{Path.home()}/.bq-meta"
+DEFAULT_BQ_META_HOME = f"{Path.home()}/.config/bq-meta"
 
 BQ_META_HOME = os.getenv("BQ_META_HOME", DEFAULT_BQ_META_HOME)
-BQ_META_RESULTS = f"{BQ_META_HOME}/results"
-BQ_META_SCHEMAS = f"{BQ_META_HOME}/schemas"
-BQ_META_INFOS = f"{BQ_META_HOME}/infos.json"
 BQ_META_CONFIG = f"{BQ_META_HOME}/config.yaml"
 
 BQ_META_DISABLE_COLORS = os.getenv("BQ_META_DISABLE_COLORS", "False").lower() in ("true", "1", "t")
@@ -17,9 +14,10 @@ BQ_META_SKIN = os.getenv("BQ_META_SKIN")
 
 default_skin = {
     "request": "gold3",
-    "info": "green",
+    "info": "green4",
     "error": "red",
     "border": "grey27",
+    "time": "yellow",
     "darker": "grey46",
     "alternate": "grey50",
     "link": "light_sky_blue1",
@@ -36,6 +34,7 @@ request_style = Style(color=skin["request"])
 info_style = Style(color=skin["info"])
 error_style = Style(color=skin["error"])
 border_style = Style(color=skin["border"])
+time_style = Style(color=skin["time"])
 darker_style = Style(color=skin["darker"])
 alternate_style = Style(color=skin["alternate"])
 link_style = Style(color=skin["link"])
