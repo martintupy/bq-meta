@@ -7,7 +7,6 @@ from rich.progress import Progress, TextColumn, TimeElapsedColumn
 from rich.text import Text
 
 from bq_meta import const
-import time
 from bq_meta.config import Config
 
 
@@ -22,7 +21,6 @@ class BqClient:
         if not self._client:
             with self.console.status(Text("Connecting to the API", style=const.darker_style), spinner="point"):
                 self._client = Client(
-                    project=self.config.project,
                     credentials=Credentials.from_authorized_user_info(self.config.credentials),
                 )
         return self._client

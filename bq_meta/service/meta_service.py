@@ -56,6 +56,7 @@ class MetaService:
         def loop(table: Table, panel: Panel, live: Live):
             char = readchar.readchar()
             if char == "r":
+                table = self.get_table(table.project, table.dataset_id, table.table_id)
                 panel = self.get_table_renderable(table)
                 now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 panel.title = now
