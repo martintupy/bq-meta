@@ -71,7 +71,7 @@ Or directly run bq-meta with full_table_id
 bq-meta bigquery-public-data:github_repos.commits
 ```
 
-![metadata](./docs/metadata.png)
+![metadata](https://github.com/martintupy/bq-meta/raw/main/docs/metadata.png)
 
 Table metadata can be refreshed, press `r` to fetch fresh metadata, `bq-meta` will be running until any other key is pressed
 
@@ -79,16 +79,16 @@ Table metadata can be refreshed, press `r` to fetch fresh metadata, `bq-meta` wi
 
 Once table metadata is opened, press `s` key
 
-![schema](./docs/schema.png)
+![schema](https://github.com/martintupy/bq-meta/raw/main/docs/schema.png)
 
 ### Open in browser
 
 Same for opening in browser, after viewing table metadata press `o` key and table will opened in Google cloud console.
 
-![browser](./docs/browser.png)
+![browser](https://raw.githubusercontent.com/martintupy/bq-meta/main/docs/browser.png)
 
 ### Search history
 
 Every viewed metadata is saved to the history. To search through history, run `bq-meta --history` / `bq-meta -h` and view same table again
 
-![history](./docs/history.png)
+![history](https://github.com/martintupy/bq-meta/raw/main/docs/history.png)
