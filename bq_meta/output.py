@@ -1,6 +1,6 @@
-from datetime import datetime
-from google.cloud.bigquery import Table
+from google.cloud import bigquery
 from rich.console import Group
+from rich.table import Table
 from rich.rule import Rule
 from rich.text import Text
 
@@ -14,7 +14,7 @@ def get_config_info(config: Config) -> Group:
 
 
 # fmt: off
-def get_table_output(table: Table) -> Group:
+def get_table_output(table: bigquery.Table) -> Group:
     size = bytes_fmt(table.num_bytes)
     long_term_size = bytes_fmt(int(table._properties.get("numLongTermBytes", "")))
     rows = num_fmt(table.num_rows)
@@ -33,22 +33,24 @@ def get_table_output(table: Table) -> Group:
     streaming_buffer_rows = num_fmt(table.streaming_buffer.estimated_rows) if table.streaming_buffer else ""
     streaming_entry_time = table.streaming_buffer.oldest_entry_time.strftime("%Y-%m-%d %H:%M:%S UTC") if table.streaming_buffer else ""
     return Group(
-        text_tuple("Table ID", table.full_table_id),
+        text_tuple("Table ID", Text(table.full_table_id, style=const.info_style)),
         text_tuple("Description", table.description),
         text_tuple("Data location", table.location),
         Rule(style=const.darker_style),
         text_tuple("Table size", size),
-        text_tuple("Long-term storage size", long_term_size),
+        text_tuple("Long-term size", long_term_size),
         text_tuple("Number of rows", rows),
         Rule(style=const.darker_style),
-        text_tuple("Created", created),
-        text_tuple("Last modified", modified),
-        text_tuple("Table expiry", expiry),
+        table_tuple({
+            "Created": created, 
+            "Last modified": modified, 
+            "Table expiry": expiry 
+        }),
         Rule(style=const.darker_style),
         text_tuple("Partitioned by", partitioned_by),
         text_tuple("Partitioned on field", partitioned_field),
         text_tuple("Partition filter", partition_filter),
-        text_tuple("Number of partitions", num_of_partitions),
+        text_tuple("Partitions number", num_of_partitions),
         Rule(style=const.darker_style),
         text_tuple("Clustered by", table.clustering_fields),
         Rule(style=const.darker_style),
@@ -59,7 +61,20 @@ def get_table_output(table: Table) -> Group:
 # fmt: on
 
 
-def text_tuple(name: str, value) -> Text:
-    return (
-        Text(name, style=const.info_style).append(" = ", style=const.darker_style).append(str(value), style="default")
+def table_tuple(tuples: dict) -> Text:
+    table = Table(
+        box=const.equal_box, show_header=False, show_edge=False, pad_edge=False, border_style=const.darker_style
     )
+    for key, value in tuples.items():
+        text = value if isinstance(tuple, Text) else Text(str(value), style="default")
+        table.add_row(Text(key, style=const.key_style), text)
+    return table
+
+
+def text_tuple(name: str, value) -> Text:
+    text = None
+    if isinstance(value, Text):
+        text = value
+    else:
+        text = Text(str(value), style="default")
+    return Text(name, style=const.key_style).append(" = ", style=const.darker_style).append(text)

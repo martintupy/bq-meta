@@ -3,6 +3,7 @@ import os
 import yaml
 from rich.style import Style
 from rich.theme import Theme
+from rich.box import Box
 
 DEFAULT_BQ_META_HOME = f"{Path.home()}/.config/bq-meta"
 
@@ -15,14 +16,14 @@ BQ_META_SKIN = os.getenv("BQ_META_SKIN")
 
 default_skin = {
     "request": "gold3",
-    "info": "green4",
+    "info": "green",
     "error": "red",
     "border": "grey50",
     "time": "yellow",
     "darker": "grey27",
     "alternate": "grey50",
     "link": "light_sky_blue1",
-    "keyword": "dodger_blue1",
+    "key": "steel_blue1",
 }
 
 skin = default_skin
@@ -39,7 +40,7 @@ time_style = Style(color=skin["time"])
 darker_style = Style(color=skin["darker"])
 alternate_style = Style(color=skin["alternate"])
 link_style = Style(color=skin["link"])
-keyword_style = Style(color=skin["keyword"])
+key_style = Style(color=skin["key"])
 
 theme = Theme(
     {
@@ -54,6 +55,19 @@ theme = Theme(
         "repr.number": "none",
         "tree.line": border_style,
     }
+)
+
+equal_box: Box = Box(
+    """\
+  = 
+  = 
+  = 
+  = 
+  = 
+  = 
+  = 
+  = 
+"""
 )
 
 FZF_SEPARATOR = " ~ "

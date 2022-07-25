@@ -33,7 +33,7 @@ bq-meta --init
 ## Examples
 
 ```bash
-Usage: bq_meta [OPTIONS] [TABLE]
+Usage: bq-meta [OPTIONS] [TABLE]
 
   BiqQuery table metadata viewer
 
@@ -41,9 +41,11 @@ Options:
   -p, --project-id TEXT  Project name
   -d, --dataset-id TEXT  Dataset name
   -t, --table-id TEXT    Table name
-  --init                 Initialize bq_meta
-  --info                 Print info of currently logged account
-  --fetch-projects       Fetch projects
+  --raw                  View raw response from the BigQuery, in json format
+  --init                 Initialize 'bq_meta' (Create config, Authenticate
+                         account, Fetch google projects)
+  --info                 Print info of currently used account
+  --fetch-projects       Fetch google projects
   --version              Show the version and exit.
   --help                 Show this message and exit.
 ```

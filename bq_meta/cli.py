@@ -23,9 +23,11 @@ from bq_meta.service.meta_service import MetaService
 @click.option("-d", "--dataset-id", help="Dataset name", default=None)
 @click.option("-t", "--table-id", help="Table name", default=None)
 @click.option("--raw", help="View raw response from the BigQuery, in json format", is_flag=True)
-@click.option("--init", help="Initialize 'bq_meta' (Create config, Authenticate account, Fetch google projects)", is_flag=True)
+@click.option(
+    "--init", help="Initialize 'bq_meta' (Create config, Authenticate account, Fetch google projects)", is_flag=True
+)
 @click.option("--info", help="Print info of currently used account", is_flag=True)
-@click.option("--fetch-projects", help="Fetch projects", is_flag=True)
+@click.option("--fetch-projects", help="Fetch google projects", is_flag=True)
 @click.version_option()
 def cli(
     table: Optional[str],
@@ -50,6 +52,7 @@ def cli(
         ctx.exit()
     elif info:
         console.print(output.get_config_info(config))
+        ctx.exit()
     elif not os.path.exists(const.BQ_META_HOME):
         panel = Panel(
             title="Not initialized, run",
@@ -67,7 +70,7 @@ def cli(
         project_id = table_ref.project
         dataset_id = table_ref.dataset_id
         table_id = table_ref.table_id
-        
+
     meta_service.print_table(project_id, dataset_id, table_id, raw)
 
 

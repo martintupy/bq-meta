@@ -48,7 +48,7 @@ class MetaService:
         panel = Panel(
             title=Text(now, style=const.time_style),
             title_align="right",
-            subtitle="refresh (r) / open (o) / schema (s)",
+            subtitle="refresh (r) / open in browser (o) / schema (s)",
             renderable=group,
             border_style=const.border_style,
         )
