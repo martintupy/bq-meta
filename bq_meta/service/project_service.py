@@ -18,5 +18,6 @@ class ProjectService:
 
     def fetch_projects(self):
         projects = self.bq_client.list_projects()
+        projects.append("bigquery-public-data")  # add bq public datasets explicitly, for testing purposes
         with open(self.projects_path, "w") as f:
             f.write("\n".join(projects))
