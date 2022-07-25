@@ -3,7 +3,6 @@ from google.cloud.bigquery import Table
 from rich.console import Group
 from rich.rule import Rule
 from rich.text import Text
-import json
 
 from bq_meta import const
 from bq_meta.config import Config
@@ -11,15 +10,11 @@ from bq_meta.util.num_utils import bytes_fmt, num_fmt
 
 
 def get_config_info(config: Config) -> Group:
-    return Group(
-        text_tuple("Project", config.project),
-        text_tuple("Account", config.account),
-    )
+    return Group(text_tuple("Account", config.account))
 
 
 # fmt: off
 def get_table_output(table: Table) -> Group:
-    # print(json.dumps(table._properties))
     size = bytes_fmt(table.num_bytes)
     long_term_size = bytes_fmt(int(table._properties.get("numLongTermBytes", "")))
     rows = num_fmt(table.num_rows)

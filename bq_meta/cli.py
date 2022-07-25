@@ -22,8 +22,9 @@ from bq_meta.service.meta_service import MetaService
 @click.option("-p", "--project-id", help="Project name", default=None)
 @click.option("-d", "--dataset-id", help="Dataset name", default=None)
 @click.option("-t", "--table-id", help="Table name", default=None)
-@click.option("--init", help="Initialize bq_meta", is_flag=True)
-@click.option("--info", help="Print info of currently logged account", is_flag=True)
+@click.option("--raw", help="View raw response from the BigQuery, in json format", is_flag=True)
+@click.option("--init", help="Initialize 'bq_meta' (Create config, Authenticate account, Fetch google projects)", is_flag=True)
+@click.option("--info", help="Print info of currently used account", is_flag=True)
 @click.option("--fetch-projects", help="Fetch projects", is_flag=True)
 @click.version_option()
 def cli(
@@ -31,6 +32,7 @@ def cli(
     project_id: Optional[str],
     dataset_id: Optional[str],
     table_id: Optional[str],
+    raw: bool,
     init: bool,
     info: bool,
     fetch_projects: bool,
@@ -62,9 +64,11 @@ def cli(
         project_service.fetch_projects()
     elif table:
         table_ref = TableReference.from_string(table.replace(":", "."))
-        meta_service.print_table_meta(table_ref.project, table_ref.dataset_id, table_ref.table_id)
-    else:
-        meta_service.print_table_meta(project_id, dataset_id, table_id)
+        project_id = table_ref.project
+        dataset_id = table_ref.dataset_id
+        table_id = table_ref.table_id
+        
+    meta_service.print_table(project_id, dataset_id, table_id, raw)
 
 
 def initialize(config: Config, console: Console, auth: Auth, project_service: ProjectService):

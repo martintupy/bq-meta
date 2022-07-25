@@ -1,3 +1,5 @@
+import json
+import time
 import webbrowser
 from datetime import datetime
 from typing import List, Optional
@@ -18,7 +20,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 from rich.tree import Tree
-import time
+
 
 class MetaService:
     def __init__(self, console: Console, config: Config, bq_client: BqClient, project_service: ProjectService):
@@ -52,7 +54,18 @@ class MetaService:
         )
         return panel
 
-    def print_table_meta(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]):
+    def print_table(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str], raw: bool):
+        if raw:
+            self.print_table_raw(project_id, dataset_id, table_id)
+        else:
+            self.print_table_rich(project_id, dataset_id, table_id)
+
+    def print_table_raw(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]):
+        table = self.get_table(project_id, dataset_id, table_id)
+        properties = json.dumps(table._properties, indent=2)
+        self.console.print_json(properties)
+
+    def print_table_rich(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]):
         def loop(table: Table, panel: Panel, live: Live):
             char = readchar.readchar()
             if char == "r":
@@ -61,7 +74,7 @@ class MetaService:
                 now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 panel.title = now
                 live.update(panel, refresh=True)
-                panel.border_style = const.request_style # border will flash a short period of time
+                panel.border_style = const.request_style  # border will flash a short period of time
                 live.update(panel, refresh=True)
                 time.sleep(0.1)
                 panel.border_style = const.border_style
