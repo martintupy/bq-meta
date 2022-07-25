@@ -18,7 +18,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 from rich.tree import Tree
-
+import time
 
 class MetaService:
     def __init__(self, console: Console, config: Config, bq_client: BqClient, project_service: ProjectService):
@@ -60,6 +60,11 @@ class MetaService:
                 panel = self.get_table_renderable(table)
                 now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 panel.title = now
+                live.update(panel, refresh=True)
+                panel.border_style = const.request_style # border will flash a short period of time
+                live.update(panel, refresh=True)
+                time.sleep(0.1)
+                panel.border_style = const.border_style
                 live.update(panel, refresh=True)
                 loop(table, panel, live)
             elif char == "o":
