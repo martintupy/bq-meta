@@ -4,6 +4,9 @@ upload:
 build:
 	sh bin/build.sh
 
+install:
+	sh bin/install.sh
+
 docker-build:
 	sh bin/docker-build.sh
 

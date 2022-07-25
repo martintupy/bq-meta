@@ -16,22 +16,22 @@ def get_config_info(config: Config) -> Group:
 # fmt: off
 def get_table_output(table: bigquery.Table) -> Group:
     size = bytes_fmt(table.num_bytes)
-    long_term_size = bytes_fmt(int(table._properties.get("numLongTermBytes", "")))
+    long_term_size = bytes_fmt(int(table._properties.get("numLongTermBytes", 0)))
     rows = num_fmt(table.num_rows)
     
     created = table.created.strftime("%Y-%m-%d %H:%M:%S UTC")
     modified = table.modified.strftime("%Y-%m-%d %H:%M:%S UTC")
-    expiry = table.expires.strftime("%Y-%m-%d %H:%M:%S UTC") if table.expires else ""
+    expiry = table.expires.strftime("%Y-%m-%d %H:%M:%S UTC") if table.expires else None
     
-    partitioned_by = table.time_partitioning.type_ if table.time_partitioning else ""
-    partitioned_field = table.time_partitioning.field if table.time_partitioning else ""
-    partition_filter = table.require_partition_filter if table.require_partition_filter else ""
+    partitioned_by = table.time_partitioning.type_ if table.time_partitioning else None
+    partitioned_field = table.time_partitioning.field if table.time_partitioning else None
+    partition_filter = table.require_partition_filter if table.require_partition_filter else None
     _num_partitions = table._properties.get("numPartitions", None)
     num_of_partitions = int(_num_partitions) if _num_partitions else None
     
-    streaming_buffer_size = bytes_fmt(table.streaming_buffer.estimated_bytes) if table.streaming_buffer else ""
-    streaming_buffer_rows = num_fmt(table.streaming_buffer.estimated_rows) if table.streaming_buffer else ""
-    streaming_entry_time = table.streaming_buffer.oldest_entry_time.strftime("%Y-%m-%d %H:%M:%S UTC") if table.streaming_buffer else ""
+    streaming_buffer_size = bytes_fmt(table.streaming_buffer.estimated_bytes) if table.streaming_buffer else None
+    streaming_buffer_rows = num_fmt(table.streaming_buffer.estimated_rows) if table.streaming_buffer else None
+    streaming_entry_time = table.streaming_buffer.oldest_entry_time.strftime("%Y-%m-%d %H:%M:%S UTC") if table.streaming_buffer else None
     return Group(
         text_tuple("Table ID", Text(table.full_table_id, style=const.info_style)),
         text_tuple("Description", table.description),

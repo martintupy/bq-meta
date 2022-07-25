@@ -16,19 +16,26 @@
 brew install fzf
 ```
 
+search through list of values (i.e. project, dataset, tables) is done using `fzf`
+
 ## Installation
 
-- Using [pypi](https://pypi.org/project/bq-meta/)
+1. Install as python package using [pypi](https://pypi.org/project/bq-meta/), this will create executable in `/usr/local/bin/bq-meta`
 
-```bash
-pip install bq-meta
-```
+    ```bash
+    pip install bq-meta
+    ```
 
-- Initialize
+2. Initialize `bq-meta`
 
-```bash
-bq-meta --init
-```
+    ```bash
+    bq-meta --init
+    ```
+
+3. Follow on screen prompts
+
+    - create configuration
+    - login to the google account using browser (Account is separated from `gcloud` cli)
 
 ## Examples
 
@@ -42,8 +49,7 @@ Options:
   -d, --dataset-id TEXT  Dataset name
   -t, --table-id TEXT    Table name
   --raw                  View raw response from the BigQuery, in json format
-  --init                 Initialize 'bq_meta' (Create config, Authenticate
-                         account, Fetch google projects)
+  --init                 Initialize 'bq_meta' (Create config, Authenticate account, Fetch google projects)
   --info                 Print info of currently used account
   --fetch-projects       Fetch google projects
   --version              Show the version and exit.

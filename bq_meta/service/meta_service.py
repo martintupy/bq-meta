@@ -121,7 +121,7 @@ class MetaService:
     def get_schema_renderable(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]):
         table = self.get_table(project_id, dataset_id, table_id)
         schema = table.schema
-        tree = Tree(Text(table.full_table_id, style=const.info_style))
+        tree = Tree("")
         table = Table(box=box.SIMPLE, show_header=False)
         MetaService._scheme_tree(schema, tree)
         MetaService._scheme_table(schema, table)

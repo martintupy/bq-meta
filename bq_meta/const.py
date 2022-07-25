@@ -53,7 +53,7 @@ theme = Theme(
         "status.spinner": "none",
         "progress.spinner": "none",
         "repr.number": "none",
-        "tree.line": border_style,
+        "tree.line": darker_style,
     }
 )
 

@@ -65,6 +65,7 @@ def cli(
         ctx.exit()
     elif fetch_projects:
         project_service.fetch_projects()
+        ctx.exit()
     elif table:
         table_ref = TableReference.from_string(table.replace(":", "."))
         project_id = table_ref.project
