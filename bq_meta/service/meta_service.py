@@ -8,6 +8,7 @@ import readchar
 from bq_meta import const, output
 from bq_meta.bq_client import BqClient
 from bq_meta.config import Config
+from bq_meta.service.history_service import HistoryService
 from bq_meta.service.project_service import ProjectService
 from bq_meta.util import bash_util
 from google.cloud.bigquery import Dataset, Table
@@ -23,11 +24,21 @@ from rich.tree import Tree
 
 
 class MetaService:
-    def __init__(self, console: Console, config: Config, bq_client: BqClient, project_service: ProjectService):
+    def __init__(
+        self,
+        console: Console,
+        config: Config,
+        bq_client: BqClient,
+        project_service: ProjectService,
+        history_service: HistoryService,
+    ):
         self.console = console
         self.config = config
         self.bq_client = bq_client
         self.project_service = project_service
+        self.history_service = history_service
+
+    # ======================   Get   =======================
 
     def get_dataset(self, project_id: Optional[str], dataset_id: Optional[str]) -> Dataset:
         project_id = project_id if project_id else self.pick_project_id()
@@ -54,18 +65,21 @@ class MetaService:
         )
         return panel
 
-    def print_table(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str], raw: bool):
-        if raw:
-            self.print_table_raw(project_id, dataset_id, table_id)
-        else:
-            self.print_table_rich(project_id, dataset_id, table_id)
+    # ======================  Print  ======================
 
-    def print_table_raw(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]):
+    def print_table(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str], raw: bool):
         table = self.get_table(project_id, dataset_id, table_id)
+        if raw:
+            self.print_table_raw(table)
+        else:
+            self.print_table_rich(table)
+        self.history_service.save_one(table)  # save sucessfuly printed table
+
+    def print_table_raw(self, table: Table):
         properties = json.dumps(table._properties, indent=2)
         self.console.print_json(properties)
 
-    def print_table_rich(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]):
+    def print_table_rich(self, table: Table):
         def loop(table: Table, panel: Panel, live: Live):
             char = readchar.readchar()
             if char == "r":
@@ -93,12 +107,14 @@ class MetaService:
                 live.stop()
                 self.print_schema(table.project, table.dataset_id, table.table_id)
             else:
+                live.stop()
                 return
 
-        table = self.get_table(project_id, dataset_id, table_id)
         panel = self.get_table_renderable(table)
         with Live(panel, auto_refresh=False) as live:
             loop(table, panel, live)
+
+    # ======================   Pick   ======================
 
     def pick_project_id(self) -> Optional[str]:
         project_ids = self.project_service.list_projects()
@@ -118,8 +134,9 @@ class MetaService:
             table_ids.append(table.table_id)
         return bash_util.pick_one(table_ids, self.console)
 
-    def get_schema_renderable(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]):
-        table = self.get_table(project_id, dataset_id, table_id)
+    # ======================  Schema  ======================
+
+    def get_schema_renderable(self, table: Table):
         schema = table.schema
         tree = Tree("")
         table = Table(box=box.SIMPLE, show_header=False)
@@ -128,7 +145,8 @@ class MetaService:
         return Columns([tree, table])
 
     def print_schema(self, project_id: Optional[str], dataset_id: Optional[str], table_id: Optional[str]):
-        schema = self.get_schema_renderable(project_id, dataset_id, table_id)
+        table = self.get_table(project_id, dataset_id, table_id)
+        schema = self.get_schema_renderable(table)
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         panel = Panel(
             title=now,

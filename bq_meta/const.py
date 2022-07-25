@@ -10,6 +10,7 @@ DEFAULT_BQ_META_HOME = f"{Path.home()}/.config/bq-meta"
 BQ_META_HOME = os.getenv("BQ_META_HOME", DEFAULT_BQ_META_HOME)
 BQ_META_CONFIG = f"{BQ_META_HOME}/config.yaml"
 BQ_META_PROJECTS = f"{BQ_META_HOME}/projects"
+BQ_META_HISTORY = f"{BQ_META_HOME}/history"
 
 BQ_META_DISABLE_COLORS = os.getenv("BQ_META_DISABLE_COLORS", "False").lower() in ("true", "1", "t")
 BQ_META_SKIN = os.getenv("BQ_META_SKIN")
