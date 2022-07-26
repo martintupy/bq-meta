@@ -1,8 +1,11 @@
+from threading import Event
 from typing import Callable, Iterator
 from rich.console import Console
 
 from rich.progress import Progress, TextColumn, TimeElapsedColumn
 from rich.text import Text
+from rich.live import Live
+from rich.panel import Panel
 
 from bq_meta import const
 
@@ -32,3 +35,13 @@ def spinner(console: Console, callable: Callable):
     with console.status(Text("Connecting to the API", style=const.darker_style), spinner="point"):
         result = callable()
     return result
+
+
+def flash_panel(live: Live, panel: Panel):
+    event = Event()
+    panel.border_style = const.request_style  # border will flash a short period of time
+    live.update(panel, refresh=True)
+    event.wait(0.1)
+    if not event.is_set():
+        panel.border_style = const.border_style
+        live.update(panel, refresh=True)

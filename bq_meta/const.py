@@ -51,6 +51,7 @@ theme = Theme(
         "rule.line": darker_style,
         "repr.path": darker_style,
         "repr.filename": darker_style,
+        "json.brace": "none",
         "status.spinner": "none",
         "progress.spinner": "none",
         "repr.number": "none",

@@ -1,15 +1,9 @@
 import subprocess
 import tempfile
-from typing import List
-
-import click
-from rich.console import Console
-
-from bq_meta import const
+from typing import List, Optional
 
 
 def _run_fzf(choices: List[str]) -> List[str]:
-    # choices.sort(reverse=True)
     choices_str = "\n".join(map(str, choices))
     selection = []
     fzf_args = filter(None, ["fzf", "--ansi"])
@@ -25,11 +19,6 @@ def _run_fzf(choices: List[str]) -> List[str]:
     return selection
 
 
-def pick_one(choices: List[str], console: Console) -> str:
+def pick_one(choices: List[str]) -> Optional[str]:
     result = next(iter(_run_fzf(choices)), None)
-    if result:
-        return result
-    else:
-        console.print("Aborted", style=const.error_style)
-        ctx = click.get_current_context()
-        ctx.exit()
+    return result

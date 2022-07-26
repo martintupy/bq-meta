@@ -24,6 +24,6 @@ class ProjectService:
         iterator = self.client.list_projects()
         for project in progress(self.console, "projects", iterator):
             projects_ids.append(project.project_id)
-            
+
         with open(self.projects_path, "w") as f:
             f.write("\n".join(projects_ids))

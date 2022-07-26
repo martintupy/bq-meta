@@ -14,13 +14,16 @@ from bq_meta.config import Config
 from bq_meta.initialize import initialize
 from bq_meta.service.history_service import HistoryService
 from bq_meta.service.project_service import ProjectService
-from bq_meta.service.meta_service import MetaService
+from bq_meta.service.table_service import TableService
+from bq_meta.util import table_utils
 from bq_meta.util.rich_utils import spinner
+from bq_meta.window import Window
 
 
 def get_client(config: Config):
     def callable():
         return Client(credentials=config.credentials)
+
     return callable
 
 
@@ -52,9 +55,11 @@ def cli(
     console = Console(theme=const.theme, soft_wrap=True)
     client = spinner(console, get_client(config))
     auth = Auth(config, console)
-    history_service = HistoryService(console, config)
     project_service = ProjectService(console, config, client)
-    meta_service = MetaService(console, config, client, project_service, history_service)
+    table_service = TableService(console, config, client, project_service)
+    history_service = HistoryService(console, config, table_service)
+    window = Window(console, history_service, table_service)
+    table = None
     if init:
         initialize(config, console, auth, project_service)
         ctx.exit()
@@ -79,11 +84,11 @@ def cli(
         project_id = table_ref.project
         dataset_id = table_ref.dataset_id
         table_id = table_ref.table_id
+        table = table_service.get_table(project_id, dataset_id, table_id)
+        if raw:
+            console.print_json(table_utils.get_properties(table))
+            ctx.exit()
     elif history:
-        from_history = history_service.pick_one()
-        table_ref = TableReference.from_string(from_history.replace(":", "."))
-        project_id = table_ref.project
-        dataset_id = table_ref.dataset_id
-        table_id = table_ref.table_id
+        table = history_service.pick_table()
 
-    meta_service.print_table(project_id, dataset_id, table_id, raw)
+    window.live_window(table)
