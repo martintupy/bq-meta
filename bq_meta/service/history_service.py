@@ -1,6 +1,6 @@
 from typing import List
 
-from bq_meta.bq_client import const
+from bq_meta import const
 from bq_meta.config import Config
 from rich.console import Console
 from google.cloud.bigquery.table import Table

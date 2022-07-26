@@ -9,12 +9,19 @@ from google.cloud.bigquery.table import TableReference
 
 from bq_meta import const, output
 from bq_meta.auth import Auth
-from bq_meta.bq_client import BqClient
+from google.cloud.bigquery import Client
 from bq_meta.config import Config
 from bq_meta.initialize import initialize
 from bq_meta.service.history_service import HistoryService
 from bq_meta.service.project_service import ProjectService
 from bq_meta.service.meta_service import MetaService
+from bq_meta.util.rich_utils import spinner
+
+
+def get_client(config: Config):
+    def callable():
+        return Client(credentials=config.credentials)
+    return callable
 
 
 @click.command()
@@ -39,15 +46,15 @@ def cli(
     info: bool,
     fetch_projects: bool,
 ):
-    """BiqQuery table metadata viewer"""
+    """BiqQuery metadata"""
     ctx = click.get_current_context()
     config = Config()
     console = Console(theme=const.theme, soft_wrap=True)
+    client = spinner(console, get_client(config))
     auth = Auth(config, console)
-    bq_client = BqClient(console, config)
     history_service = HistoryService(console, config)
-    project_service = ProjectService(console, config, bq_client)
-    meta_service = MetaService(console, config, bq_client, project_service, history_service)
+    project_service = ProjectService(console, config, client)
+    meta_service = MetaService(console, config, client, project_service, history_service)
     if init:
         initialize(config, console, auth, project_service)
         ctx.exit()

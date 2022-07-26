@@ -1,4 +1,4 @@
-# BigQuery metadata viewer
+# BigQuery metadata
 
 > "Inspect BigQuery metadata faster"
 
@@ -42,7 +42,7 @@ search through list of values (i.e. project, dataset, tables) is done using `fzf
 ```bash
 Usage: bq-meta [OPTIONS] [FULL_TABLE_ID]
 
-  BiqQuery table metadata viewer
+  BiqQuery table metadata
 
 Options:
   -p, --project-id TEXT  Project name

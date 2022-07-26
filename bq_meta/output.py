@@ -3,10 +3,22 @@ from rich.console import Group
 from rich.table import Table
 from rich.rule import Rule
 from rich.text import Text
+from rich.align import Align
 
 from bq_meta import const
 from bq_meta.config import Config
 from bq_meta.util.num_utils import bytes_fmt, num_fmt
+
+header = """
+██▄ █ ▄▀  ▄▀▄ █ █ ██▀ █▀▄ ▀▄▀   █▄ ▄█ ██▀ ▀█▀ ▄▀▄ █▀▄ ▄▀▄ ▀█▀ ▄▀▄
+█▄█ █ ▀▄█ ▀▄█ ▀▄█ █▄▄ █▀▄  █    █ ▀ █ █▄▄  █  █▀█ █▄▀ █▀█  █  █▀█
+"""
+
+header_renderable = Align(
+    header,
+    align="center",
+    style=const.info_style,
+)
 
 
 def get_config_info(config: Config) -> Group:
@@ -33,7 +45,8 @@ def get_table_output(table: bigquery.Table) -> Group:
     streaming_buffer_rows = num_fmt(table.streaming_buffer.estimated_rows) if table.streaming_buffer else None
     streaming_entry_time = table.streaming_buffer.oldest_entry_time.strftime("%Y-%m-%d %H:%M:%S UTC") if table.streaming_buffer else None
     return Group(
-        text_tuple("Table ID", Text(table.full_table_id, style=const.info_style)),
+        Rule(style=const.darker_style),
+        text_tuple("Table ID", table.full_table_id),
         text_tuple("Description", table.description),
         text_tuple("Data location", table.location),
         Rule(style=const.darker_style),
@@ -57,6 +70,7 @@ def get_table_output(table: bigquery.Table) -> Group:
         text_tuple("Streaming buffer rows", streaming_buffer_rows),
         text_tuple("Streaming buffer size", streaming_buffer_size),
         text_tuple("Streaming entry time", streaming_entry_time),
+        Rule(style=const.darker_style),
     )
 # fmt: on
 

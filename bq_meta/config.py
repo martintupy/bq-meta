@@ -2,6 +2,7 @@ import json
 from typing import List
 
 import yaml
+from google.oauth2.credentials import Credentials
 
 from bq_meta import const
 
@@ -65,7 +66,8 @@ class Config:
 
     @property
     def credentials(self) -> dict:
-        return json.loads(self.conf["credentials"])
+        obj = json.loads(self.conf["credentials"])
+        return Credentials.from_authorized_user_info(obj)
 
     @credentials.setter
     def credentials(self, credentials: dict):
