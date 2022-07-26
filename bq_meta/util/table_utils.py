@@ -35,5 +35,6 @@ def _scheme_tree(fields: List[SchemaField], tree: Tree):
             _scheme_tree(field.fields, node)
     return
 
+
 def get_properties(table: bigquery.Table) -> str:
     return json.dumps(table._properties, indent=2)
