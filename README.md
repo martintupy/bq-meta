@@ -2,9 +2,10 @@
 
 > "Inspect BigQuery metadata faster"
 
-- quick search through available projects, dataset, tables
-- view table metadata and schema
-- open in browser
+- Interactive CLI
+- Quick search through available projects, datasets, tables
+- View up to date table's metadata and it's schema
+- Local history of searched tables
 
 ## Requirements
 
@@ -37,58 +38,60 @@ search through list of values (i.e. project, dataset, tables) is done using `fzf
     - create configuration
     - login to the google account using browser (Account is separated from `gcloud` cli)
 
-## Examples
+## Run
+
+To open interactive CLI, simply run
 
 ```bash
-Usage: bq-meta [OPTIONS] [FULL_TABLE_ID]
-
-  BiqQuery table metadata
-
-Options:
-  -p, --project-id TEXT  Project name
-  -d, --dataset-id TEXT  Dataset name
-  -t, --table-id TEXT    Table name
-  -h, --history          Show history of past searched tables
-  --raw                  View raw response from the BigQuery in json format
-  --init                 Initialize 'bq-meta' configuration
-  --info                 Print info of currently used account
-  --fetch-projects       Fetch google projects
-  --version              Show the version and exit.
-  --help                 Show this message and exit.
+bq-meta
 ```
+
+![cli](https://github.com/martintupy/bq-meta/raw/main/docs/cli.png)
 
 ### Table metadata
 
-To view table metadata, run `bq-meta` and follow through selection of
+To view table metadata, press `o` key and select through project, dataset, table.
 
-- project_id
-- dataset_id
-- table_id
+![metadata](https://github.com/martintupy/bq-meta/raw/main/docs/metadata.png)
 
-Or directly run bq-meta with full_table_id
+Table metadata can be refreshed, press `r` to fetch fresh metadata
+
+It's also possible to run `bq-meta` directly with `FULL_TABLE_ID`
 
 ```bash
 bq-meta bigquery-public-data:github_repos.commits
 ```
 
-![metadata](https://github.com/martintupy/bq-meta/raw/main/docs/metadata.png)
-
-Table metadata can be refreshed, press `r` to fetch fresh metadata, `bq-meta` will be running until any other key is pressed
-
 ### Table schema
 
-Once table metadata is opened, press `s` key
+Once table metadata is opened, press `s` key to view it's schema
 
 ![schema](https://github.com/martintupy/bq-meta/raw/main/docs/schema.png)
 
-### Open in browser
+### Open in console
 
-Same for opening in browser, after viewing table metadata press `o` key and table will opened in Google cloud console.
+You can open table in console.cloud.google.com by pressing `c` key
 
 ![browser](https://raw.githubusercontent.com/martintupy/bq-meta/main/docs/browser.png)
 
 ### Search history
 
-Every viewed metadata is saved to the history. To search through history, run `bq-meta --history` / `bq-meta -h` and view same table again
+Every viewed table is saved to the history. To search through history, press `h` key
 
 ![history](https://github.com/martintupy/bq-meta/raw/main/docs/history.png)
+
+### Other
+
+```bash
+Usage: python -m bq_meta [OPTIONS] [FULL_TABLE_ID]
+
+  BiqQuery metadata
+
+Options:
+  --raw             View raw response from the BigQuery for specific 'FULL_TABLE_ID'
+  --init            Initialize 'bq-meta' configuration
+  --info            Print info of currently used account
+  --fetch-projects  Fetch availabe google projects
+  --version         Show the version and exit.
+  --help            Show this message and exit.
+```

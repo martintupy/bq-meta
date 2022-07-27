@@ -29,21 +29,13 @@ def get_client(config: Config):
 
 @click.command()
 @click.argument("full_table_id", required=False)
-@click.option("-p", "--project-id", help="Project name", default=None)
-@click.option("-d", "--dataset-id", help="Dataset name", default=None)
-@click.option("-t", "--table-id", help="Table name", default=None)
-@click.option("-h", "--history", help="Show history of past searched tables", is_flag=True)
-@click.option("--raw", help="View raw response from the BigQuery in json format", is_flag=True)
+@click.option("--raw", help="View raw response from the BigQuery for specific 'FULL_TABLE_ID'", is_flag=True)
 @click.option("--init", help="Initialize 'bq-meta' configuration", is_flag=True)
 @click.option("--info", help="Print info of currently used account", is_flag=True)
-@click.option("--fetch-projects", help="Fetch google projects", is_flag=True)
+@click.option("--fetch-projects", help="Fetch availabe google projects", is_flag=True)
 @click.version_option()
 def cli(
     full_table_id: Optional[str],
-    project_id: Optional[str],
-    dataset_id: Optional[str],
-    table_id: Optional[str],
-    history: Optional[int],
     raw: bool,
     init: bool,
     info: bool,
@@ -88,7 +80,5 @@ def cli(
         if raw:
             console.print_json(table_utils.get_properties(table))
             ctx.exit()
-    elif history:
-        table = history_service.pick_table()
 
     window.live_window(table)
