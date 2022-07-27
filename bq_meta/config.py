@@ -9,7 +9,6 @@ from bq_meta import const
 
 class Config:
     default = {
-        "project": "",
         "client_config": {  # client_config of the google-cloud-sdk
             "installed": {
                 "client_id": "32555940559.apps.googleusercontent.com",
@@ -66,8 +65,7 @@ class Config:
 
     @property
     def credentials(self) -> dict:
-        obj = json.loads(self.conf["credentials"])
-        return Credentials.from_authorized_user_info(obj)
+        return json.loads(self.conf["credentials"])
 
     @credentials.setter
     def credentials(self, credentials: dict):

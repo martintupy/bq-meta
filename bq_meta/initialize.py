@@ -11,7 +11,7 @@ from bq_meta.config import Config
 from bq_meta.service.project_service import ProjectService
 
 
-def initialize(config: Config, console: Console, auth: Auth, project_service: ProjectService):
+def initialize(config: Config, console: Console, project_service: ProjectService):
     bq_meta_home = Prompt.ask(
         Text("", style=const.darker_style).append("Enter bq_meta home path", style=const.request_style),
         default=const.DEFAULT_BQ_META_HOME,
@@ -34,6 +34,7 @@ def initialize(config: Config, console: Console, auth: Auth, project_service: Pr
         default="Press enter",
         console=console,
     )
+    auth = Auth(config, console)
     auth.login()
 
     project_service.fetch_projects()

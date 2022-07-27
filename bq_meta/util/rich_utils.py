@@ -22,18 +22,11 @@ def progress(console: Console, name: str, iterator: Iterator) -> list:
         console=console,
         transient=True,
     ) as progress:
-        task = progress.add_task(f"Listing {name}")
+        task = progress.add_task(f"Fetching {name}")
         for item in iterator:
             result.append(item)
             progress.advance(task)
             size += 1
-    return result
-
-
-def spinner(console: Console, callable: Callable):
-    result = None
-    with console.status(Text("Connecting to the API", style=const.darker_style), spinner="point"):
-        result = callable()
     return result
 
 
