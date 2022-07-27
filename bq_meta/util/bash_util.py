@@ -4,7 +4,8 @@ from typing import List, Optional
 
 
 def _run_fzf(choices: List[str]) -> List[str]:
-    choices_str = "\n".join(map(str, choices))
+    choices.reverse()  # reverse order when searching - from bottom to top
+    choices_str = "\n".join(choices)
     selection = []
     fzf_args = filter(None, ["fzf", "--ansi"])
     with tempfile.NamedTemporaryFile() as input_file:

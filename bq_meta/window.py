@@ -72,6 +72,8 @@ class Window:
         # Open new table
         if char == "o":
             self.table = self.table_service.get_table()
+            if self.table:
+                self.history_service.save_table(self.table)
             self._update_table_refs()
             table_content = output.get_table_output(self.table) if self.table else None
             self._update_panel(live, table_content)
@@ -101,6 +103,8 @@ class Window:
         # Show history
         elif char == "h":
             self.table = self.history_service.pick_table()
+            if self.table:
+                self.history_service.save_table(self.table)
             self._update_table_refs()
             table_content = output.get_table_output(self.table) if self.table else None
             self._update_panel(live, table_content)
@@ -109,6 +113,8 @@ class Window:
         # List datasets within this project
         elif char == "d":
             self.table = self.table_service.get_table(self.project_id, None, None)
+            if self.table:
+                self.history_service.save_table(self.table)
             self._update_table_refs()
             table_content = output.get_table_output(self.table) if self.table else None
             self._update_panel(live, table_content)
@@ -117,6 +123,8 @@ class Window:
         # List tables within this project:dataset
         elif char == "t":
             self.table = self.table_service.get_table(self.project_id, self.dataset_id, None)
+            if self.table:
+                self.history_service.save_table(self.table)
             self._update_table_refs()
             table_content = output.get_table_output(self.table) if self.table else None
             self._update_panel(live, table_content)
