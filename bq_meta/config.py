@@ -2,7 +2,6 @@ import json
 from typing import List
 
 import yaml
-from google.oauth2.credentials import Credentials
 
 from bq_meta import const
 

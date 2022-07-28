@@ -1,9 +1,8 @@
 from threading import Event
-from typing import Callable, Iterator
+from typing import Iterator
 from rich.console import Console
 
 from rich.progress import Progress, TextColumn, TimeElapsedColumn
-from rich.text import Text
 from rich.live import Live
 from rich.panel import Panel
 

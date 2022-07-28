@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Optional
 
 import readchar
-from readchar import key
 from bq_meta import const, output
 from bq_meta.service.history_service import HistoryService
 from bq_meta.service.table_service import TableService
@@ -11,6 +10,7 @@ from google.cloud import bigquery
 from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
+from rich.layout import Layout
 from rich.console import Group, RenderableType
 
 from bq_meta.util import table_utils
@@ -29,6 +29,7 @@ class Window:
         self.table_id: Optional[str] = None
         self.table: Optional[bigquery.Table] = None
         self.panel: Optional[Panel] = None
+        self.subtitle = "open (o) | history (h) | quit (q)"
         self.console = console
         self.history_service = history_service
         self.table_service = table_service
@@ -51,11 +52,11 @@ class Window:
         self.panel = Panel(
             title=now,
             title_align="right",
-            subtitle="open (o) | refresh (r) | schema (s) | console (c) | history (h) | quit (q)",
+            subtitle=self.subtitle,
             renderable=group,
             border_style=const.border_style,
         )
-        live.update(self.panel, refresh=True)
+        live.update(Layout(self.panel), refresh=True)
 
     def _update_table_refs(self):
         """
@@ -71,8 +72,9 @@ class Window:
 
         # Open new table
         if char == "o":
-            self.table = self.table_service.get_table()
+            self.table = self.table_service.get_table(live=live)
             if self.table:
+                self.subtitle = "open (o) | refresh (r) | schema (s) | console (c) | history (h) | quit (q)"
                 self.history_service.save_table(self.table)
             self._update_table_refs()
             table_content = output.get_table_output(self.table) if self.table else None
@@ -80,15 +82,17 @@ class Window:
             self._loop(live)
 
         # Refresh table
-        elif (char == "r" or char == key.ESC) and self.table:
+        elif char == "r" and self.table:
             self.table = self.table_service.get_fresh_table(self.table)
             table_content = output.get_table_output(self.table)
             self._update_panel(live, table_content)
             flash_panel(live, self.panel)
             self._loop(live)
 
-        # Show schema of current table
+        # Show schema
         elif char == "s":
+            if self.table:
+                self.subtitle = "open (o) | refresh (r) | table (t) | console (c) | history (h) | quit (q)"
             schema_content = table_utils.get_schema(self.table) if self.table else None
             self._update_panel(live, schema_content)
             self._loop(live)
@@ -102,31 +106,22 @@ class Window:
 
         # Show history
         elif char == "h":
-            self.table = self.history_service.pick_table()
+            self.table = self.history_service.pick_table(live)
             if self.table:
+                self.subtitle = "open (o) | refresh (r) | schema (s) | console (c) | history (h) | quit (q)"
                 self.history_service.save_table(self.table)
+            else:
+                self.subtitle = "open (o) | history (h) | quit (q)"
             self._update_table_refs()
             table_content = output.get_table_output(self.table) if self.table else None
             self._update_panel(live, table_content)
             self._loop(live)
 
-        # List datasets within this project
-        elif char == "d":
-            self.table = self.table_service.get_table(self.project_id, None, None)
-            if self.table:
-                self.history_service.save_table(self.table)
-            self._update_table_refs()
-            table_content = output.get_table_output(self.table) if self.table else None
-            self._update_panel(live, table_content)
-            self._loop(live)
-
-        # List tables within this project:dataset
+        # Show table
         elif char == "t":
-            self.table = self.table_service.get_table(self.project_id, self.dataset_id, None)
             if self.table:
-                self.history_service.save_table(self.table)
-            self._update_table_refs()
-            table_content = output.get_table_output(self.table) if self.table else None
+                self.subtitle = "open (o) | refresh (r) | schema (s) | console (c) | history (h) | quit (q)"
+                table_content = output.get_table_output(self.table)
             self._update_panel(live, table_content)
             self._loop(live)
 

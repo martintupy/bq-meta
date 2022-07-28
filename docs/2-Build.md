@@ -17,5 +17,3 @@ python3 -m pip install --upgrade build
 ```bash
 python -m build
 ```
-
-## 3. Install
