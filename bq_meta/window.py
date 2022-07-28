@@ -13,7 +13,6 @@ from rich.panel import Panel
 from rich.layout import Layout
 from rich.console import Group, RenderableType
 
-from bq_meta.util import table_utils
 from bq_meta.util.rich_utils import flash_layout
 
 
@@ -29,6 +28,7 @@ class Window:
         self.table_id: Optional[str] = None
         self.table: Optional[bigquery.Table] = None
         self.layout: Layout = Layout()
+        self.content: Optional[RenderableType] = None
         self.subtitle = "open (o) | history (h) | quit (q)"
         self.console = console
         self.history_service = history_service
@@ -38,16 +38,14 @@ class Window:
         self.table = table
         with Live(self.layout, auto_refresh=False, screen=True, transient=True) as live:
             if self.table:
-                table_content = output.get_table_output(self.table)
-                self._update_panel(live, table_content)
-            else:
-                self._update_panel(live, None)
+                self.content = output.get_table_output(self.table)
             self._loop(live)
 
-    def _update_panel(self, live: Live, content: Optional[RenderableType]) -> None:
-        group = Group(output.header_renderable)
-        if content:
-            group = Group(output.header_renderable, content)
+    def _update_panel(self, live: Live) -> None:
+        if self.content:
+            group = Group(output.header_renderable, self.content)
+        else:
+            group = Group(output.header_renderable)
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         panel = Panel(
             title=now,
@@ -69,6 +67,7 @@ class Window:
             self.table_id = self.table.table_id
 
     def _loop(self, live: Live):
+        self._update_panel(live)
         char = readchar.readkey()
 
         # Open new table
@@ -76,17 +75,14 @@ class Window:
             self.table = self.table_service.get_table(live=live)
             if self.table:
                 self.subtitle = "open (o) | refresh (r) | schema (s) | console (c) | history (h) | quit (q)"
+                self.content = output.get_table_output(self.table)
                 self.history_service.save_table(self.table)
             self._update_table_refs()
-            table_content = output.get_table_output(self.table) if self.table else None
-            self._update_panel(live, table_content)
             self._loop(live)
 
         # Refresh table
         elif char == "r" and self.table:
             self.table = self.table_service.get_fresh_table(self.table)
-            table_content = output.get_table_output(self.table)
-            self._update_panel(live, table_content)
             flash_layout(live, self.layout)
             self._loop(live)
 
@@ -94,8 +90,7 @@ class Window:
         elif char == "s":
             if self.table:
                 self.subtitle = "open (o) | refresh (r) | table (t) | console (c) | history (h) | quit (q)"
-            schema_content = table_utils.get_schema(self.table) if self.table else None
-            self._update_panel(live, schema_content)
+                self.content = output.get_schema_output(self.table)
             self._loop(live)
 
         # Open table in the google console
@@ -111,19 +106,15 @@ class Window:
             if self.table:
                 self.subtitle = "open (o) | refresh (r) | schema (s) | console (c) | history (h) | quit (q)"
                 self.history_service.save_table(self.table)
-            else:
-                self.subtitle = "open (o) | history (h) | quit (q)"
-            self._update_table_refs()
-            table_content = output.get_table_output(self.table) if self.table else None
-            self._update_panel(live, table_content)
+                self.content = output.get_table_output(self.table)
+                self._update_table_refs()
             self._loop(live)
 
         # Show table
         elif char == "t":
             if self.table:
                 self.subtitle = "open (o) | refresh (r) | schema (s) | console (c) | history (h) | quit (q)"
-                table_content = output.get_table_output(self.table)
-            self._update_panel(live, table_content)
+                self.content = output.get_table_output(self.table)
             self._loop(live)
 
         # Quit program

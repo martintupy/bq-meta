@@ -3,10 +3,14 @@ from rich.console import Group
 from rich.table import Table
 from rich.rule import Rule
 from rich.text import Text
+from rich.columns import Columns
+from rich.tree import Tree
 from rich.align import Align
+from rich.box import SIMPLE
 
 from bq_meta import const
 from bq_meta.config import Config
+from bq_meta.util import table_utils
 from bq_meta.util.num_utils import bytes_fmt, num_fmt
 
 header = """
@@ -23,6 +27,15 @@ header_renderable = Align(
 
 def get_config_info(config: Config) -> Group:
     return Group(text_tuple("Account", config.account))
+
+
+def get_schema_output(table: bigquery.Table) -> Group:
+    schema = table.schema
+    tree = Tree(Text("Schema", const.key_style))
+    table = Table(box=SIMPLE, show_header=False)
+    table_utils.scheme_tree(schema, tree)
+    table_utils.scheme_table(schema, table)
+    return Group(Rule(style=const.darker_style), Columns([tree, table]))
 
 
 # fmt: off
