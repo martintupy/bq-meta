@@ -8,7 +8,6 @@ from rich.text import Text
 from google.cloud.bigquery.table import TableReference
 
 from bq_meta import const, output
-from google.cloud.bigquery import Client
 from bq_meta.bq_client import BqClient
 from bq_meta.config import Config
 from bq_meta.initialize import initialize
