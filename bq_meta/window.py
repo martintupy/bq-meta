@@ -102,8 +102,9 @@ class Window:
 
         # Show history
         elif char == "h":
-            self.table = self.history_service.pick_table(live)
-            if self.table:
+            from_history = self.history_service.pick_table(live)
+            if from_history:
+                self.table = from_history
                 self.subtitle = "open (o) | refresh (r) | schema (s) | console (c) | history (h) | quit (q)"
                 self.history_service.save_table(self.table)
                 self.content = output.get_table_output(self.table)
