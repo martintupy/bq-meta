@@ -14,7 +14,7 @@ from rich.layout import Layout
 from rich.console import Group, RenderableType
 
 from bq_meta.util import table_utils
-from bq_meta.util.rich_utils import flash_panel
+from bq_meta.util.rich_utils import flash_layout
 
 
 class Window:
@@ -28,7 +28,7 @@ class Window:
         self.dataset_id: Optional[str] = None
         self.table_id: Optional[str] = None
         self.table: Optional[bigquery.Table] = None
-        self.panel: Optional[Panel] = None
+        self.layout: Layout = Layout()
         self.subtitle = "open (o) | history (h) | quit (q)"
         self.console = console
         self.history_service = history_service
@@ -36,7 +36,7 @@ class Window:
 
     def live_window(self, table: Optional[bigquery.Table]):
         self.table = table
-        with Live(self.panel, auto_refresh=False, screen=True, transient=True) as live:
+        with Live(self.layout, auto_refresh=False, screen=True, transient=True) as live:
             if self.table:
                 table_content = output.get_table_output(self.table)
                 self._update_panel(live, table_content)
@@ -49,14 +49,15 @@ class Window:
         if content:
             group = Group(output.header_renderable, content)
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.panel = Panel(
+        panel = Panel(
             title=now,
             title_align="right",
             subtitle=self.subtitle,
             renderable=group,
             border_style=const.border_style,
         )
-        live.update(Layout(self.panel), refresh=True)
+        self.layout = Layout(panel)
+        live.update(self.layout, refresh=True)
 
     def _update_table_refs(self):
         """
@@ -86,7 +87,7 @@ class Window:
             self.table = self.table_service.get_fresh_table(self.table)
             table_content = output.get_table_output(self.table)
             self._update_panel(live, table_content)
-            flash_panel(live, self.panel)
+            flash_layout(live, self.layout)
             self._loop(live)
 
         # Show schema

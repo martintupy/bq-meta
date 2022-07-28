@@ -15,3 +15,6 @@ docker-run:
 
 format:
 	black .
+
+tag:
+	sh bin/tag.sh

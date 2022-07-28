@@ -23,20 +23,20 @@ search through list of values (i.e. project, dataset, tables) is done using `fzf
 
 1. Install as python package using [pypi](https://pypi.org/project/bq-meta/), this will create executable in `/usr/local/bin/bq-meta`
 
-    ```bash
-    pip install bq-meta
-    ```
+   ```bash
+   pip install bq-meta
+   ```
 
 2. Initialize `bq-meta`
 
-    ```bash
-    bq-meta --init
-    ```
+   ```bash
+   bq-meta --init
+   ```
 
 3. Follow on screen prompts
 
-    - create configuration
-    - login to the google account using browser (Account is separated from `gcloud` cli)
+   - create configuration
+   - login to the google account using browser (Account is separated from `gcloud` cli)
 
 ## Run
 
@@ -91,7 +91,7 @@ Options:
   --raw             View raw response from the BigQuery for specific 'FULL_TABLE_ID'
   --init            Initialize 'bq-meta' configuration
   --info            Print info of currently used account
-  --fetch-projects  Fetch availabe google projects
+  --fetch-projects  Fetch available google projects
   --version         Show the version and exit.
   --help            Show this message and exit.
 ```
