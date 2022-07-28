@@ -11,6 +11,7 @@ from google.cloud import bigquery
 from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
+from rich.layout import Layout
 from rich.console import Group, RenderableType
 
 from bq_meta.util import table_utils
@@ -55,7 +56,7 @@ class Window:
             renderable=group,
             border_style=const.border_style,
         )
-        live.update(self.panel, refresh=True)
+        live.update(Layout(self.panel), refresh=True)
 
     def _update_table_refs(self):
         """

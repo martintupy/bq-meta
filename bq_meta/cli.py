@@ -24,7 +24,7 @@ from bq_meta.window import Window
 @click.option("--raw", help="View raw response from the BigQuery for specific 'FULL_TABLE_ID'", is_flag=True)
 @click.option("--init", help="Initialize 'bq-meta' configuration", is_flag=True)
 @click.option("--info", help="Print info of currently used account", is_flag=True)
-@click.option("--fetch-projects", help="Fetch availabe google projects", is_flag=True)
+@click.option("--fetch-projects", help="Fetch available google projects", is_flag=True)
 @click.version_option()
 def cli(
     full_table_id: Optional[str],
@@ -36,7 +36,7 @@ def cli(
     """BiqQuery metadata"""
 
     ctx = click.get_current_context()
-    console = Console(theme=const.theme, soft_wrap=True)
+    console = Console(theme=const.theme, soft_wrap=True, force_interactive=True)
     config = Config()
     bq_client = BqClient(console, config)
     project_service = ProjectService(console, config, bq_client)

@@ -19,9 +19,3 @@ for example:
 ```bash
 pip install dist/bq-meta-0.0.1.tar.gz
 ```
-
-## 3. Program is now acccessible from venv
-
-```bash
-bq-meta
-```

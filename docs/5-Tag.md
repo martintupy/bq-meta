@@ -2,20 +2,23 @@
 
 For publishing distribution to Pypi we need to create tag fro github action
 
-## 1. Git tag
+### 1. Git tag
 
 ```bash
-git tag <tagname> -a -m <message>
+git tag $TAG -a -m $MESSAGE
 ```
 
-e.g.
+### 2. Push tag
 
 ```bash
-git tag 0.5.0 -a -m "Make fullscreen CLI"
+git push origin --tags
 ```
 
-## 2. Push tag
+## Summary
 
 ```bash
+TAG=
+MESSAGE=
+git tag $TAG -a -m $MESSAGE
 git push origin --tags
 ```
