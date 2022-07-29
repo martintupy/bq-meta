@@ -6,6 +6,7 @@ import click
 
 import readchar
 from bq_meta import const, output
+from bq_meta.config import Config
 from bq_meta.service.history_service import HistoryService
 from bq_meta.service.table_service import TableService
 from google.cloud import bigquery
@@ -13,7 +14,7 @@ from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 from rich.layout import Layout
-from rich.console import Group, RenderableType
+from rich.console import RenderableType
 
 from bq_meta.util.rich_utils import flash_panel
 
@@ -28,10 +29,12 @@ class Window:
     def __init__(
         self,
         console: Console,
+        config: Config,
         history_service: HistoryService,
         table_service: TableService,
     ):
         self.console = console
+        self.config = config
         self.history_service = history_service
         self.table_service = table_service
         self.table: Optional[bigquery.Table] = None
@@ -53,25 +56,29 @@ class Window:
             self._loop(live)
 
     def _update_panel(self, live: Live) -> None:
+        content_layout = Layout()
+        header = output.header_renderable(self.config)
         if self.content:
-            group = Group(output.header_renderable, self.content)
+            content = Layout(self.content, name="content")
         else:
-            group = Group(output.header_renderable)
+            content = Layout(name="content", visible=False)
+        content_layout.split_column(header, content)
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.panel = Panel(
+        panel = Panel(
             title=now,
             title_align="right",
             subtitle=self.subtitle,
-            renderable=group,
+            renderable=content_layout,
             border_style=const.border_style,
         )
-        self.layout = Layout(self.panel)
+        self.layout = Layout(panel)
+        self.panel = panel
         live.update(self.layout, refresh=True)
 
     def _update_table(self, table: bigquery.Table):
         """
-        Update table identifiers to the state, used when listing dataset and tables
-        Save table to history
+        Update table identifiers to the state, used when listing datasets or tables
+        Save table to the history
         """
         if table:
             self.table = table
@@ -131,7 +138,7 @@ class Window:
                 self._update_table(table)
                 self._update_view(View.table)
 
-        # Refresh table
+        # Refresh view
         elif char == "r" and self.table:
             table = self.table_service.get_fresh_table(self.table)
             flash_panel(live, self.layout, self.panel)

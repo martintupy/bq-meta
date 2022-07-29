@@ -22,6 +22,8 @@ class Config:
             "openid",
         ],
         "credentials": None,
+        "current_version": "",
+        "available_version": "",
         "account": "",
     }
 
@@ -69,4 +71,22 @@ class Config:
     @credentials.setter
     def credentials(self, credentials: dict):
         conf = {**self.conf, "credentials": credentials}
+        self._save_conf(conf)
+
+    @property
+    def current_version(self) -> str:
+        return self.conf.get("current_version", None)
+
+    @current_version.setter
+    def current_version(self, current_version: str):
+        conf = {**self.conf, "current_version": current_version}
+        self._save_conf(conf)
+
+    @property
+    def available_version(self) -> str:
+        return self.conf.get("available_version", None)
+
+    @available_version.setter
+    def available_version(self, available_version: str):
+        conf = {**self.conf, "available_version": available_version}
         self._save_conf(conf)

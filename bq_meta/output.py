@@ -13,16 +13,36 @@ from bq_meta.config import Config
 from bq_meta.util import table_utils
 from bq_meta.util.num_utils import bytes_fmt, num_fmt
 
-header = """
+from rich.rule import Rule
+from bq_meta import const
+from google.cloud import bigquery
+from rich.align import Align
+from rich.layout import Layout
+from rich.console import NewLine
+from rich.text import Text
+from rich.console import Group
+from packaging import version
+
+title = """
 ██▄ █ ▄▀  ▄▀▄ █ █ ██▀ █▀▄ ▀▄▀   █▄ ▄█ ██▀ ▀█▀ ▄▀▄ █▀▄ ▄▀▄ ▀█▀ ▄▀▄
 █▄█ █ ▀▄█ ▀▄█ ▀▄█ █▄▄ █▀▄  █    █ ▀ █ █▄▄  █  █▀█ █▄▀ █▀█  █  █▀█
 """
 
-header_renderable = Align(
-    header,
-    align="center",
-    style=const.info_style,
-)
+
+def header_renderable(config: Config):
+    header_title = Align(title, align="center", style=const.info_style)
+    header = Layout(name="header", size=4)
+    current = version.parse(config.current_version)
+    available = version.parse(config.available_version)
+    if current < available:
+        version_text = Text(f"{current} ► {available}", style=const.darker_style)
+    else:
+        version_text = Text(f"{current}", style=const.darker_style)
+    left = Layout(version_text, size=20)
+    mid = Layout(header_title)
+    right = Layout(NewLine(), size=20)
+    header.split_row(left, mid, right)
+    return header
 
 
 def get_config_info(config: Config) -> Group:
