@@ -143,6 +143,7 @@ class Window:
             table = self.table_service.get_fresh_table(self.table)
             flash_panel(live, self.layout, self.panel)
             if table:
+                self.table = table
                 self._update_view(self.view)
 
         # Show schema
