@@ -1,3 +1,4 @@
+from enum import Enum
 import webbrowser
 from datetime import datetime
 from typing import Optional
@@ -14,7 +15,13 @@ from rich.panel import Panel
 from rich.layout import Layout
 from rich.console import Group, RenderableType
 
-from bq_meta.util.rich_utils import flash_layout
+from bq_meta.util.rich_utils import flash_panel
+
+
+class View(Enum):
+    empty = 1
+    table = 2
+    schema = 3
 
 
 class Window:
@@ -24,19 +31,24 @@ class Window:
         history_service: HistoryService,
         table_service: TableService,
     ):
+        self.console = console
+        self.history_service = history_service
+        self.table_service = table_service
         self.table: Optional[bigquery.Table] = None
         self.project_id: Optional[str] = None
         self.dataset_id: Optional[str] = None
         self.layout: Layout = Layout()
         self.content: Optional[RenderableType] = None
-        self.subtitle = "open (o) | history (h) | quit (q)"
-        self.console = console
-        self.history_service = history_service
-        self.table_service = table_service
+        self.view: View = View.empty
+        self.subtitle: Optional[str] = None
 
     def live_window(self, table: Optional[bigquery.Table]):
         if table:
             self._update_table(table)
+            self._update_view(View.table)
+        else:
+            self._update_view(View.empty)
+
         with Live(self.layout, auto_refresh=False, screen=True, transient=True) as live:
             self._loop(live)
 
@@ -46,31 +58,48 @@ class Window:
         else:
             group = Group(output.header_renderable)
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        panel = Panel(
+        self.panel = Panel(
             title=now,
             title_align="right",
             subtitle=self.subtitle,
             renderable=group,
             border_style=const.border_style,
         )
-        self.layout = Layout(panel)
+        self.layout = Layout(self.panel)
         live.update(self.layout, refresh=True)
 
     def _update_table(self, table: bigquery.Table):
         """
         Update table identifiers to the state, used when listing dataset and tables
-        Update subtitle for table view
         Save table to history
-        Set content to table output
         """
-        self.table = table
-        self.project_id = table.project
-        self.dataset_id = table.dataset_id
-        self.subtitle = "open (o) | refresh (r) | schema (s) | console (c) | history (h) | quit (q)"
-        self.history_service.save_table(self.table)
-        self.content = output.get_table_output(self.table)
+        if table:
+            self.table = table
+            self.project_id = table.project
+            self.dataset_id = table.dataset_id
+            self.history_service.save_table(table)
+
+    def _update_view(self, view: View):
+        """
+        Set view, subtitle and content
+        """
+        if view == View.empty:
+            self.view = view
+            self.subtitle = "open (o) | history (h) | quit (q)"
+        elif view == View.table and self.table:
+            self.view = view
+            self.subtitle = "open (o) | refresh (r) | schema (s) | console (c) | history (h) | quit (q)"
+            self.content = output.get_table_output(self.table)
+        elif view == View.schema and self.table:
+            self.view = view
+            self.subtitle = "open (o) | refresh (r) | table (t) | console (c) | history (h) | quit (q)"
+            self.content = output.get_schema_output(self.table)
 
     def _loop(self, live: Live):
+        """
+        Loop listening on specific keypress, updating live CLI
+        """
+
         self._update_panel(live)
         char = readchar.readkey()
 
@@ -79,41 +108,45 @@ class Window:
             table = self.table_service.get_table(live=live)
             if table:
                 self._update_table(table)
+                self._update_view(View.table)
 
         # List datasets
         elif char == "2":
             table = self.table_service.get_table(self.project_id, live=live)
             if table:
                 self._update_table(table)
+                self._update_view(View.table)
 
         # List tables
         elif char == "3":
             table = self.table_service.get_table(self.project_id, self.dataset_id, live=live)
             if table:
                 self._update_table(table)
+                self._update_view(View.table)
 
         # List history
         elif char == "h":
             table = self.history_service.pick_table(live)
             if table:
                 self._update_table(table)
+                self._update_view(View.table)
 
         # Refresh table
         elif char == "r" and self.table:
-            self.table = self.table_service.get_fresh_table(self.table)
-            flash_layout(live, self.layout)
+            table = self.table_service.get_fresh_table(self.table)
+            flash_panel(live, self.layout, self.panel)
+            if table:
+                self._update_view(self.view)
 
         # Show schema
         elif char == "s":
             if self.table:
-                self.subtitle = "open (o) | refresh (r) | table (t) | console (c) | history (h) | quit (q)"
-                self.content = output.get_schema_output(self.table)
+                self._update_view(View.schema)
 
         # Show table
         elif char == "t":
             if self.table:
-                self.subtitle = "open (o) | refresh (r) | schema (s) | console (c) | history (h) | quit (q)"
-                self.content = output.get_table_output(self.table)
+                self._update_view(View.table)
 
         # Open table in the google console
         elif char == "c":

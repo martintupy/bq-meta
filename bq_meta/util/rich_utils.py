@@ -30,9 +30,8 @@ def progress(console: Console, name: str, iterator: Iterator) -> list:
     return result
 
 
-def flash_layout(live: Live, layout: Layout):
+def flash_panel(live: Live, layout: Layout, panel: Panel):
     event = Event()
-    panel: Panel = layout.renderable
     panel.border_style = const.request_style  # border will flash a short period of time
     live.update(layout, refresh=True)
     event.wait(0.1)
