@@ -1,0 +1,6 @@
+Click
+google-auth-oauthlib
+google-cloud-bigquery
+pyyaml
+rich
+readchar

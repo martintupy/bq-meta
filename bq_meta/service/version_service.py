@@ -21,4 +21,9 @@ class VersionService:
         return version
 
     def _get_current_version() -> str:
-        return version("bq-meta")
+        try:
+            ver = version("pubsub-meta")
+        except:
+            ver = None
+        return ver
+
