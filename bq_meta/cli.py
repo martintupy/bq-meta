@@ -42,10 +42,12 @@ def cli(
     project_service = ProjectService(console, config, bq_client)
     table_service = TableService(console, config, bq_client, project_service)
     history_service = HistoryService(console, config, table_service)
-    version_service = VersionService()
     window = Window(console, config, history_service, table_service)
     table = None
-    version_service.update_config(config)
+    
+    if os.path.exists(const.BQ_META_HOME):
+        version_service = VersionService()
+        version_service.update_config(config)
 
     if init:
         initialize(config, console, project_service)

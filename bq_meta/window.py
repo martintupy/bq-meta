@@ -57,7 +57,7 @@ class Window:
 
     def _update_panel(self, live: Live) -> None:
         content_layout = Layout()
-        header = output.header_renderable(self.config)
+        header = output.header_layout(self.config)
         if self.content:
             content = Layout(self.content, name="content")
         else:

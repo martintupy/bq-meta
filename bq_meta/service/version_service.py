@@ -22,7 +22,7 @@ class VersionService:
 
     def _get_current_version() -> str:
         try:
-            ver = version("pubsub-meta")
+            ver = version("bq-meta")
         except:
             ver = None
         return ver

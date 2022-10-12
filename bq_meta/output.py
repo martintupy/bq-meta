@@ -29,20 +29,27 @@ title = """
 """
 
 
-def header_renderable(config: Config):
+def header_layout(config: Config) -> Layout:
     header_title = Align(title, align="center", style=const.info_style)
     header = Layout(name="header", size=4)
-    current = version.parse(config.current_version)
-    available = version.parse(config.available_version)
-    if current < available:
-        version_text = Text(f"{current} ► {available}", style=const.darker_style)
-    else:
-        version_text = Text(f"{current}", style=const.darker_style)
-    left = Layout(version_text, size=20)
+    left = version_layout(config)
     mid = Layout(header_title)
     right = Layout(NewLine(), size=20)
     header.split_row(left, mid, right)
     return header
+
+
+def version_layout(config: Config) -> Layout:
+    if config.current_version and config.available_version:
+        current = version.parse(config.current_version)
+        available = version.parse(config.available_version)
+        if current < available:
+            version_text = Text(f"{current} ► {available}", style=const.darker_style)
+        else:
+            version_text = Text(f"{current}", style=const.darker_style)
+    else:
+        version_text = Text(" ", style=const.darker_style)
+    return Layout(version_text, size=20)
 
 
 def get_config_info(config: Config) -> Group:
