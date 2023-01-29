@@ -1,6 +1,8 @@
 Click
 google-auth-oauthlib
 google-cloud-bigquery
+jinja
+pyperclip
 pyyaml
-rich
 readchar
+rich

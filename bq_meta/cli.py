@@ -14,6 +14,7 @@ from bq_meta.initialize import initialize
 from bq_meta.service.history_service import HistoryService
 from bq_meta.service.project_service import ProjectService
 from bq_meta.service.table_service import TableService
+from bq_meta.service.template_service import TemplateService
 from bq_meta.service.version_service import VersionService
 from bq_meta.util import table_utils
 from bq_meta.window import Window
@@ -41,8 +42,9 @@ def cli(
     bq_client = BqClient(console, config)
     project_service = ProjectService(console, config, bq_client)
     table_service = TableService(console, config, bq_client, project_service)
+    template_service = TemplateService()
     history_service = HistoryService(console, config, table_service)
-    window = Window(console, config, history_service, table_service)
+    window = Window(console, config, history_service, table_service, template_service)
     table = None
     
     if os.path.exists(const.BQ_META_HOME):

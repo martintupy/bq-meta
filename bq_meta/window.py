@@ -15,6 +15,7 @@ from rich.live import Live
 from rich.panel import Panel
 from rich.layout import Layout
 from rich.console import RenderableType
+from bq_meta.service.template_service import TemplateService
 
 from bq_meta.util.rich_utils import flash_panel
 
@@ -32,11 +33,13 @@ class Window:
         config: Config,
         history_service: HistoryService,
         table_service: TableService,
+        template_service: TemplateService,
     ):
         self.console = console
         self.config = config
         self.history_service = history_service
         self.table_service = table_service
+        self.template_service = template_service
         self.table: Optional[bigquery.Table] = None
         self.project_id: Optional[str] = None
         self.dataset_id: Optional[str] = None
@@ -95,11 +98,11 @@ class Window:
             self.subtitle = "open (o) | history (h) | quit (q)"
         elif view == View.table and self.table:
             self.view = view
-            self.subtitle = "open (o) | refresh (r) | schema (s) | console (c) | history (h) | quit (q)"
+            self.subtitle = "open (o) | refresh (r) | schema (s) | templates (t) | console (c) | history (h) | quit (q)"
             self.content = output.get_table_output(self.table)
         elif view == View.schema and self.table:
             self.view = view
-            self.subtitle = "open (o) | refresh (r) | table (t) | console (c) | history (h) | quit (q)"
+            self.subtitle = "open (o) | refresh (r) | table (s) | console (c) | history (h) | quit (q)"
             self.content = output.get_schema_output(self.table)
 
     def _loop(self, live: Live):
@@ -146,21 +149,26 @@ class Window:
                 self.table = table
                 self._update_view(self.view)
 
-        # Show schema
+        # Toggle schema
         elif char == "s":
             if self.table:
-                self._update_view(View.schema)
-
-        # Show table
-        elif char == "t":
-            if self.table:
-                self._update_view(View.table)
+                if self.view == View.table:
+                    self._update_view(View.schema)
+                elif self.view == View.schema:
+                    self._update_view(View.table)
 
         # Open table in the google console
         elif char == "c":
             if self.table:
-                url = f"https://console.cloud.google.com/bigquery?p={self.table.project}&d={self.table.dataset_id}&t={self.table.table_id}&page=table"
+                url = f"https://console.cloud.google.com/bigquery?p={self.table.project}&d={self.table.dataset_id}&t={self.table.table_id}&page=query"
                 webbrowser.open(url)
+
+        # Render template to clipboard
+        elif char == "t":
+            if self.table:
+                template = self.template_service.get_template(live)
+                if template:
+                    self.template_service.template_to_clipboard(template, self.table)
 
         # Quit program
         elif char == "q":
