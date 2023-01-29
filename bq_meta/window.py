@@ -159,7 +159,7 @@ class Window:
         # Open table in the google console
         elif char == "c":
             if self.table:
-                url = f"https://console.cloud.google.com/bigquery?&ws=!1m5!1m4!4m3!1s{self.table.project}!2s{self.table.dataset_id}!3s{self.table.table_id}"
+                url = f"https://console.cloud.google.com/bigquery?p={self.table.project}&d={self.table.dataset_id}&t={self.table.table_id}&page=table"
                 webbrowser.open(url)
 
         # Quit program

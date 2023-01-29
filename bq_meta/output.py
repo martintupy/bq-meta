@@ -1,27 +1,19 @@
 from google.cloud import bigquery
-from rich.console import Group
-from rich.table import Table
-from rich.rule import Rule
-from rich.text import Text
-from rich.columns import Columns
-from rich.tree import Tree
+from packaging import version
 from rich.align import Align
 from rich.box import SIMPLE
+from rich.columns import Columns
+from rich.console import Group, NewLine
+from rich.layout import Layout
+from rich.rule import Rule
+from rich.table import Table
+from rich.text import Text
+from rich.tree import Tree
 
 from bq_meta import const
 from bq_meta.config import Config
 from bq_meta.util import table_utils
 from bq_meta.util.num_utils import bytes_fmt, num_fmt
-
-from rich.rule import Rule
-from bq_meta import const
-from google.cloud import bigquery
-from rich.align import Align
-from rich.layout import Layout
-from rich.console import NewLine
-from rich.text import Text
-from rich.console import Group
-from packaging import version
 
 title = """
 ██▄ █ ▄▀  ▄▀▄ █ █ ██▀ █▀▄ ▀▄▀   █▄ ▄█ ██▀ ▀█▀ ▄▀▄ █▀▄ ▄▀▄ ▀█▀ ▄▀▄
@@ -67,8 +59,13 @@ def get_schema_output(table: bigquery.Table) -> Group:
 
 # fmt: off
 def get_table_output(table: bigquery.Table) -> Group:
-    size = bytes_fmt(table.num_bytes)
-    long_term_size = bytes_fmt(int(table._properties.get("numLongTermBytes", 0)))
+    total_logical_bytes = bytes_fmt(int(table._properties.get("numTotalLogicalBytes", 0)))
+    active_logical_bytes = bytes_fmt(int(table._properties.get("numActiveLogicalBytes", 0)))
+    long_term_logical_bytes = bytes_fmt(int(table._properties.get("numLongTermLogicalBytes", 0)))
+    total_physical_bytes = bytes_fmt(int(table._properties.get("numTotalPhysicalBytes", 0)))
+    active_physical_bytes = bytes_fmt(int(table._properties.get("numActivePhysicalBytes", 0)))
+    long_term_physical_bytes = bytes_fmt(int(table._properties.get("numLongTermPhysicalBytes", 0)))
+    time_travel_physical_bytes = bytes_fmt(int(table._properties.get("numTimeTravelPhysicalBytes", 0)))
     rows = num_fmt(table.num_rows)
     
     created = table.created.strftime("%Y-%m-%d %H:%M:%S UTC")
@@ -85,31 +82,43 @@ def get_table_output(table: bigquery.Table) -> Group:
     streaming_buffer_rows = num_fmt(table.streaming_buffer.estimated_rows) if table.streaming_buffer else None
     streaming_entry_time = table.streaming_buffer.oldest_entry_time.strftime("%Y-%m-%d %H:%M:%S UTC") if table.streaming_buffer else None
     return Group(
-        Rule(style=const.darker_style),
-        text_tuple("Table ID", table.full_table_id),
-        text_tuple("Description", table.description),
-        text_tuple("Data location", table.location),
-        Rule(style=const.darker_style),
-        text_tuple("Table size", size),
-        text_tuple("Long-term size", long_term_size),
-        text_tuple("Number of rows", rows),
-        Rule(style=const.darker_style),
+        Rule("Table info", style=const.darker_style),
         table_tuple({
-            "Created": created, 
-            "Last modified": modified, 
-            "Table expiry": expiry 
+            "Table ID": table.full_table_id,
+            "Friendly name": table.friendly_name,
+            "Created": created,
+            "Last modified": modified,
+            "Table expiry": expiry,
+            "Data location": table.location,
+            "Data location": table.location,
         }),
         Rule(style=const.darker_style),
-        text_tuple("Partitioned by", partitioned_by),
-        text_tuple("Partitioned on field", partitioned_field),
-        text_tuple("Partition filter", partition_filter),
-        text_tuple("Partitions number", num_of_partitions),
-        Rule(style=const.darker_style),
-        text_tuple("Clustered by", table.clustering_fields),
-        Rule(style=const.darker_style),
-        text_tuple("Streaming buffer rows", streaming_buffer_rows),
-        text_tuple("Streaming buffer size", streaming_buffer_size),
-        text_tuple("Streaming entry time", streaming_entry_time),
+        table_tuple({
+            "Table type": table.table_type,
+            "Partitioned by": partitioned_by,
+            "Partitioned on field": partitioned_field,
+            "Partition expiry": table.partition_expiration,
+            "Partition filter": partition_filter,
+            "Clustered by": table.clustering_fields,
+        }),
+        Rule("Storage info", style=const.darker_style),
+        table_tuple({
+            "Number of row": rows, 
+            "Number of partitions": num_of_partitions, 
+            "Total logical bytes": total_logical_bytes, 
+            "Active logical bytes": active_logical_bytes, 
+            "Long-term logical bytes": long_term_logical_bytes, 
+            "Total physical bytes": total_physical_bytes, 
+            "Active physical bytes": active_physical_bytes, 
+            "Long-term physical bytes": long_term_physical_bytes, 
+            "Time travel physical bytes": time_travel_physical_bytes, 
+        }),
+        Rule("Streaming buffer statistics", style=const.darker_style),
+        table_tuple({
+            "Estimated size": streaming_buffer_size,
+            "Estimated rows": streaming_buffer_rows,
+            "Earliest entry time": streaming_entry_time,
+        }),
         Rule(style=const.darker_style),
     )
 # fmt: on
@@ -117,7 +126,11 @@ def get_table_output(table: bigquery.Table) -> Group:
 
 def table_tuple(tuples: dict) -> Text:
     table = Table(
-        box=const.equal_box, show_header=False, show_edge=False, pad_edge=False, border_style=const.darker_style
+        box=const.equal_box,
+        show_header=False,
+        show_edge=False,
+        pad_edge=False,
+        border_style=const.darker_style,
     )
     for key, value in tuples.items():
         text = value if isinstance(tuple, Text) else Text(str(value), style="default")
