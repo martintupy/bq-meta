@@ -56,6 +56,9 @@ def get_schema_output(table: bigquery.Table) -> Group:
     table_utils.scheme_table(schema, table)
     return Group(Rule(style=const.darker_style), Columns([tree, table]))
 
+def get_template_output(template: str) -> Group:
+    return Group(Rule(style=const.darker_style), template)
+
 
 # fmt: off
 def get_table_output(table: bigquery.Table) -> Group:

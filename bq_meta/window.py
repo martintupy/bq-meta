@@ -24,6 +24,7 @@ class View(Enum):
     empty = 1
     table = 2
     schema = 3
+    template = 4
 
 
 class Window:
@@ -47,6 +48,7 @@ class Window:
         self.content: Optional[RenderableType] = None
         self.view: View = View.empty
         self.subtitle: Optional[str] = None
+        self.template: Optional[str] = None
 
     def live_window(self, table: Optional[bigquery.Table]):
         if table:
@@ -98,12 +100,16 @@ class Window:
             self.subtitle = "open (o) | history (h) | quit (q)"
         elif view == View.table and self.table:
             self.view = view
-            self.subtitle = "open (o) | refresh (r) | schema (s) | templates (t) | console (c) | history (h) | quit (q)"
+            self.subtitle = "open (o) | refresh (r) | schema (s) | template (t) | console (c) | history (h) | quit (q)"
             self.content = output.get_table_output(self.table)
         elif view == View.schema and self.table:
             self.view = view
             self.subtitle = "open (o) | refresh (r) | table (s) | console (c) | history (h) | quit (q)"
             self.content = output.get_schema_output(self.table)
+        elif view == View.template and self.template:
+            self.view = view
+            self.subtitle = "open (o) | refresh (r) | schema (s) | table (t) | console (c) | history (h) | quit (q)"
+            self.content = output.get_template_output(self.template)
 
     def _loop(self, live: Live):
         """
@@ -149,7 +155,7 @@ class Window:
                 self.table = table
                 self._update_view(self.view)
 
-        # Toggle schema
+        # Toggle schema view
         elif char == "s":
             if self.table:
                 if self.view == View.table:
@@ -163,12 +169,16 @@ class Window:
                 url = f"https://console.cloud.google.com/bigquery?p={self.table.project}&d={self.table.dataset_id}&t={self.table.table_id}&page=query"
                 webbrowser.open(url)
 
-        # Render template to clipboard
+        # Toggle template view
         elif char == "t":
             if self.table:
-                template = self.template_service.get_template(live)
-                if template:
-                    self.template_service.template_to_clipboard(template, self.table)
+                if self.view == View.table:
+                    template = self.template_service.get_template(live, self.table)
+                    if template:
+                        self.template = template
+                        self._update_view(View.template)
+                elif self.view == View.template:
+                    self._update_view(View.table)
 
         # Quit program
         elif char == "q":
