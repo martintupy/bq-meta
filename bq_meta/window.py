@@ -118,60 +118,58 @@ class Window:
 
         self._update_panel(live)
         char = readchar.readkey()
+        match char:
 
-        # List projects / Open new table
-        if char == "1" or char == "o":
-            table = self.table_service.get_table(live=live)
-            if table:
-                self._update_table(table)
-                self._update_view(View.table)
+            # List projects / Open new table
+            case "1" | "o":
+                table = self.table_service.get_table(live=live)
+                if table:
+                    self._update_table(table)
+                    self._update_view(View.table)
 
-        # List datasets
-        elif char == "2":
-            table = self.table_service.get_table(self.project_id, live=live)
-            if table:
-                self._update_table(table)
-                self._update_view(View.table)
+            # List datasets
+            case "2":
+                table = self.table_service.get_table(self.project_id, live=live)
+                if table:
+                    self._update_table(table)
+                    self._update_view(View.table)
 
-        # List tables
-        elif char == "3":
-            table = self.table_service.get_table(self.project_id, self.dataset_id, live=live)
-            if table:
-                self._update_table(table)
-                self._update_view(View.table)
+            # List tables
+            case "3":
+                table = self.table_service.get_table(self.project_id, self.dataset_id, live=live)
+                if table:
+                    self._update_table(table)
+                    self._update_view(View.table)
 
-        # List history
-        elif char == "h":
-            table = self.history_service.pick_table(live)
-            if table:
-                self._update_table(table)
-                self._update_view(View.table)
+            # List history
+            case "h":
+                table = self.history_service.pick_table(live)
+                if table:
+                    self._update_table(table)
+                    self._update_view(View.table)
 
-        # Refresh view
-        elif char == "r" and self.table:
-            table = self.table_service.get_fresh_table(self.table)
-            flash_panel(live, self.layout, self.panel)
-            if table:
-                self.table = table
-                self._update_view(self.view)
+            # Refresh view
+            case "r" if self.table:
+                table = self.table_service.get_fresh_table(self.table)
+                flash_panel(live, self.layout, self.panel)
+                if table:
+                    self.table = table
+                    self._update_view(self.view)
 
-        # Toggle schema view
-        elif char == "s":
-            if self.table:
+            # Toggle schema view
+            case "s" if self.table:
                 if self.view == View.table:
                     self._update_view(View.schema)
                 elif self.view == View.schema:
                     self._update_view(View.table)
 
-        # Open table in the google console
-        elif char == "c":
-            if self.table:
+            # Open table in the google console
+            case "c" if self.table:
                 url = f"https://console.cloud.google.com/bigquery?p={self.table.project}&d={self.table.dataset_id}&t={self.table.table_id}&page=query"
                 webbrowser.open(url)
 
-        # Toggle template view
-        elif char == "t":
-            if self.table:
+            # Toggle template view
+            case "t" if self.table:
                 if self.view == View.table:
                     template = self.template_service.get_template(live, self.table)
                     if template:
@@ -180,10 +178,10 @@ class Window:
                 elif self.view == View.template:
                     self._update_view(View.table)
 
-        # Quit program
-        elif char == "q":
-            live.stop()
-            click.get_current_context().exit()
+            # Quit program
+            case "q":
+                live.stop()
+                click.get_current_context().exit()
 
         # Infinite loop, until quitted (q)
         self._loop(live)
