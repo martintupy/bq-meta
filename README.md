@@ -9,7 +9,7 @@
 
 ## Requirements
 
-- python >= 3.6
+- python >= 3.10
 
 - fzf - https://github.com/junegunn/fzf (required)
 
