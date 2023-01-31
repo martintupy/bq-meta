@@ -1,19 +1,22 @@
+from typing import List, Optional
 from google.cloud import bigquery
 from packaging import version
 from rich.align import Align
 from rich.box import SIMPLE
 from rich.columns import Columns
-from rich.console import Group, NewLine
+from rich.console import Group, NewLine, RenderableType
 from rich.layout import Layout
+from rich.panel import Panel
 from rich.rule import Rule
 from rich.table import Table
 from rich.text import Text
 from rich.tree import Tree
-
+from rich.syntax import Syntax
 from bq_meta import const
 from bq_meta.config import Config
 from bq_meta.util import table_utils
 from bq_meta.util.num_utils import bytes_fmt, num_fmt
+from bq_meta.window import Hint
 
 title = """
 ██▄ █ ▄▀  ▄▀▄ █ █ ██▀ █▀▄ ▀▄▀   █▄ ▄█ ██▀ ▀█▀ ▄▀▄ █▀▄ ▄▀▄ ▀█▀ ▄▀▄
@@ -41,7 +44,41 @@ def version_layout(config: Config) -> Layout:
             version_text = Text(f"{current}", style=const.darker_style)
     else:
         version_text = Text(" ", style=const.darker_style)
-    return Layout(version_text, size=20)
+    return Layout(version_text, name="version", size=20)
+
+
+def list_layout(values: List[str], selected: Optional[str]) -> Layout:
+    show = values and selected
+    panel = Panel(NewLine())
+    if show:
+        separator = Rule(style=const.darker_style)
+        values_list = []
+        for value in values:
+            if value == selected:
+                text = Text(f"● {value}", style=const.info_style)
+            else:
+                text = Text(f"  {value}", style="default")
+            values_list.extend([text, separator])
+        panel = Panel(Group(*values_list), box=const.box_right_rounded, style=const.darker_style)
+    return Layout(panel, size=30, visible=show)
+
+
+def content_layout(renderable: Optional[RenderableType]) -> Layout:
+    if renderable:
+        content = Panel(renderable, border_style=const.darker_style)
+    else:
+        content = Panel(NewLine(), border_style=const.darker_style)
+    return Layout(content, name="content")
+
+
+def hints_layout(hints: List[Hint]) -> Layout:
+    separator = Rule(style=const.darker_style)
+    hints_list = []
+    for hint in hints:
+        text = Text(f"{hint.name} ({hint.key})", style="default")
+        hints_list.extend([text, separator])
+    panel = Panel(Group(*hints_list), box=const.box_left_rounded, style=const.darker_style)
+    return Layout(panel, size=30)
 
 
 def get_config_info(config: Config) -> Group:
@@ -50,11 +87,16 @@ def get_config_info(config: Config) -> Group:
 
 def get_schema_output(table: bigquery.Table) -> Group:
     schema = table.schema
-    tree = Tree(Text("Schema", const.key_style))
+    tree = Tree(Text(table.full_table_id, const.key_style))
     table = Table(box=SIMPLE, show_header=False)
     table_utils.scheme_tree(schema, tree)
     table_utils.scheme_table(schema, table)
-    return Group(Rule(style=const.darker_style), Columns([tree, table]))
+    return Group(Rule("Schema", style=const.darker_style), Columns([tree, table]))
+
+
+def get_template_output(template: str) -> Group:
+    syntax = Syntax(template, lexer="SqlJinjaLexer", line_numbers=True)
+    return Group(Rule("Rendered template", style=const.darker_style), syntax)
 
 
 # fmt: off

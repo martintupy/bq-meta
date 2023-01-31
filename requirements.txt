@@ -1,7 +1,7 @@
 Click
 google-auth-oauthlib
 google-cloud-bigquery
-jinja
+jinja2
 pyperclip
 pyyaml
 readchar

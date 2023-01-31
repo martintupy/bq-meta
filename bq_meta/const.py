@@ -73,4 +73,30 @@ equal_box: Box = Box(
 """
 )
 
+box_right_rounded: Box = Box(
+    """\
+ ─┬╮
+  ││
+ ─┼┤
+  ││
+ ─┼┤
+ ─┼┤
+  ││
+ ─┴╯
+"""
+)
+
+box_left_rounded: Box = Box(
+    """\
+╭─┬ 
+│ │ 
+├─┼ 
+│ │ 
+├─┼ 
+├─┼ 
+│ │ 
+╰─┴ 
+"""
+)
+
 FZF_SEPARATOR = " ~ "
