@@ -40,12 +40,12 @@ hint_open = Hint("o", "Open new table")
 hint_refresh = Hint("r", "Refresh table")
 hint_table = Hint("t", "Show table")
 hint_schema = Hint("s", "Show schema")
-hint_snippets = Hint("ctrl-s", "Show snippets")
+hint_snippets = Hint("p", "Show snippets")
 hint_console = Hint("c", "Open in console")
 hint_history = Hint("h", "Show history")
 hint_quit = Hint("q", "Quit")
 
-all_hints = [hint_open, hint_refresh, hint_table, hint_schema, hint_snippets, hint_console, hint_history, hint_quit]
+all_hints = [hint_open, hint_refresh, hint_table, hint_schema, hint_snippets, hint_console, hint_history]
 
 
 class Window:
@@ -69,6 +69,7 @@ class Window:
         self.content: Optional[RenderableType] = None
         self.view: View = View.empty
         self.hints: List[str] = []
+        self.bottom_hints: List[str] = [hint_quit]
         self.values: List[str] = []
         self.selected_value: Optional[str] = None
         self.snippet: Optional[str] = None
@@ -79,10 +80,10 @@ class Window:
         with Live(self.layout, auto_refresh=False, screen=True, transient=True) as live:
             self._loop(live)
 
-    def _update_content(self):
+    def _update_content(self, live: Live):
         match self.view:
             case View.empty:
-                self.hints = [hint_open, hint_history, hint_quit]
+                self.hints = [hint_open, hint_history]
             case View.table if self.table:
                 self.hints = all_hints
                 self.values = []
@@ -93,7 +94,11 @@ class Window:
                 self.hints = all_hints
                 self.values = []
                 self.selected_value = None
-                self.content = output.get_schema_output(self.table)
+                live.stop()
+                with self.console.pager():
+                    self.console.print(output.get_schema_output(self.table))
+                self.view = View.table
+                live.start()
             case View.snippets if self.table:
                 self.hints = all_hints
                 self.snippet = self.snippet_service.get_snippet(self.selected_value, self.table)
@@ -102,7 +107,7 @@ class Window:
     def _update_panel(self, live: Live) -> None:
         window_layout = Layout(name="window")
         body_layout = Layout(name="body")
-        hints_layout = output.hints_layout(self.hints)
+        hints_layout = output.hints_layout(self.hints, self.bottom_hints)
         content_layout = output.content_layout(self.content)
         list_layout = output.list_layout(self.values, self.selected_value)
         header_layout = output.header_layout(self.config)
@@ -131,7 +136,7 @@ class Window:
         """
         Loop listening on specific keypress, updating live CLI
         """
-        self._update_content()
+        self._update_content(live)
         self._update_panel(live)
         char = readchar.readkey()
         match char:
