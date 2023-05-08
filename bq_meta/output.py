@@ -94,9 +94,9 @@ def get_schema_output(table: bigquery.Table) -> Group:
     return Group(Rule("Schema", style=const.darker_style), Columns([tree, table]))
 
 
-def get_template_output(template: str) -> Group:
-    syntax = Syntax(template, lexer="SqlJinjaLexer", line_numbers=True)
-    return Group(Rule("Rendered template", style=const.darker_style), syntax)
+def get_snippet_output(snippet: str) -> Group:
+    syntax = Syntax(snippet, lexer="SqlJinjaLexer", line_numbers=True)
+    return Group(Rule("Snippet", style=const.darker_style), syntax)
 
 
 # fmt: off
@@ -133,6 +133,7 @@ def get_table_output(table: bigquery.Table) -> Group:
             "Table expiry": expiry,
             "Data location": table.location,
             "Data location": table.location,
+            "Description": table.description,
         }),
         Rule(style=const.darker_style),
         table_tuple({

@@ -1,3 +1,5 @@
+.PHONY: build
+
 upload:
 	sh bin/upload.sh
 

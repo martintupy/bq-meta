@@ -8,13 +8,13 @@ from rich.text import Text
 from google.cloud.bigquery.table import TableReference
 
 from bq_meta import const, output
-from bq_meta.bq_client import BqClient
+from bq_meta.client import Client
 from bq_meta.config import Config
 from bq_meta.initialize import initialize
 from bq_meta.service.history_service import HistoryService
 from bq_meta.service.project_service import ProjectService
 from bq_meta.service.table_service import TableService
-from bq_meta.service.template_service import TemplateService
+from bq_meta.service.snippet_service import SnippetService
 from bq_meta.service.version_service import VersionService
 from bq_meta.util import table_utils
 from bq_meta.window import Window
@@ -39,12 +39,12 @@ def cli(
     ctx = click.get_current_context()
     console = Console(theme=const.theme, soft_wrap=True, force_interactive=True)
     config = Config()
-    bq_client = BqClient(console, config)
-    project_service = ProjectService(console, config, bq_client)
-    table_service = TableService(console, config, bq_client, project_service)
-    template_service = TemplateService()
+    client = Client(console, config)
+    project_service = ProjectService(console, config, client)
+    table_service = TableService(console, config, client, project_service)
+    snippet_service = SnippetService()
     history_service = HistoryService(console, config, table_service)
-    window = Window(console, config, history_service, table_service, template_service)
+    window = Window(console, config, history_service, table_service, snippet_service)
     table = None
     
     if os.path.exists(const.BQ_META_HOME):

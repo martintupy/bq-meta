@@ -1,0 +1,3 @@
+SELECT ddl
+FROM `{{project}}.{{dataset}}`.INFORMATION_SCHEMA.TABLES
+WHERE table_name = '{{table}}'

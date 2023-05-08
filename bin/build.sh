@@ -3,4 +3,4 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-python3 -m build
+python3 -m build --sdist

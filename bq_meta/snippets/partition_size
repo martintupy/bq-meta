@@ -1,0 +1,7 @@
+SELECT
+  PARSE_DATE("%Y%m%d", partition_id) AS date,
+  total_rows,
+  ROUND(total_logical_bytes/POW(2,30), 2) AS size_GB
+FROM `{{project}}.{{dataset}}.INFORMATION_SCHEMA.PARTITIONS`
+WHERE table_name = '{{table}}' AND partition_id != "__NULL__"
+ORDER BY partition_id desc

@@ -16,12 +16,12 @@ class HistoryService:
         self.table_service = table_service
         self.history_path = const.BQ_META_HISTORY
 
-    def list_history(self) -> List[str]:
+    def list_tables(self) -> List[str]:
         projects = open(self.history_path, "r").read().splitlines()
         return projects
 
     def save_table(self, table: Table):
-        history = self.list_history()
+        history = self.list_tables()
         try:
             history.remove(table.full_table_id)
         except ValueError:
@@ -31,7 +31,7 @@ class HistoryService:
             f.write("\n".join(history))
 
     def pick_table(self, live: Optional[Live]) -> Optional[Table]:
-        history = self.list_history()
+        history = self.list_tables()
         from_history = bash_util.pick_one(history, live)
         table = None
         if from_history:
