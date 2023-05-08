@@ -105,7 +105,7 @@ def get_schema_output(table: bigquery.Table) -> Group:
 
 
 def get_snippet_output(snippet: str) -> Group:
-    syntax = Syntax(snippet, lexer="SqlLexer", line_numbers=True)
+    syntax = Syntax(snippet, lexer="SqlLexer", line_numbers=True, theme="ansi_dark")
     return Group(Rule("Snippet", style=const.darker_style), syntax)
 
 
