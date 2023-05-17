@@ -16,7 +16,6 @@ from rich.tree import Tree
 
 from bq_meta import const
 from bq_meta.config import Config
-from bq_meta.sql_style import SqlStyle
 from bq_meta.util import table_utils
 from bq_meta.util.num_utils import bytes_fmt, num_fmt
 from bq_meta.window import Hint
