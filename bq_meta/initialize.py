@@ -1,3 +1,5 @@
+import bq_meta
+
 from pathlib import Path
 
 from rich.console import Console, Group, NewLine
@@ -9,6 +11,7 @@ from bq_meta import const
 from bq_meta.auth import Auth
 from bq_meta.config import Config
 from bq_meta.service.project_service import ProjectService
+from distutils.dir_util import copy_tree
 
 
 def initialize(config: Config, console: Console, project_service: ProjectService):
@@ -27,6 +30,10 @@ def initialize(config: Config, console: Console, project_service: ProjectService
     _print_created(console, const.BQ_META_PROJECTS)
     Path(const.BQ_META_HISTORY).touch()
     _print_created(console, const.BQ_META_HISTORY)
+    Path(const.BQ_META_SNIPPETS).mkdir(parents=True, exist_ok=True)
+    _print_created(console, const.BQ_META_SNIPPETS)
+    Path(bq_meta.__file__).resolve().parent
+    copy_tree(Path(bq_meta.__file__).resolve().parent / "snippets", const.BQ_META_SNIPPETS)
 
     Prompt.ask(
         Text("", style=const.darker_style).append("Login to google account", style=const.request_style),

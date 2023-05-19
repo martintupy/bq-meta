@@ -1,0 +1,2 @@
+SELECT ROUND(SUM(size_bytes)/POW(2,40), 2) AS Size_TB
+FROM `{{project}}.{{dataset}}.__TABLES__`

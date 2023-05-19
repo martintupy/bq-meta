@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from google.cloud import bigquery
 from packaging import version
 from rich.align import Align
@@ -8,10 +9,11 @@ from rich.console import Group, NewLine, RenderableType
 from rich.layout import Layout
 from rich.panel import Panel
 from rich.rule import Rule
+from rich.syntax import Syntax
 from rich.table import Table
 from rich.text import Text
 from rich.tree import Tree
-from rich.syntax import Syntax
+
 from bq_meta import const
 from bq_meta.config import Config
 from bq_meta.util import table_utils
@@ -71,14 +73,21 @@ def content_layout(renderable: Optional[RenderableType]) -> Layout:
     return Layout(content, name="content")
 
 
-def hints_layout(hints: List[Hint]) -> Layout:
+def hints_layout(hints: List[Hint], bottom_hints: List[Hint]) -> Layout:
+    hints_layout = Layout(name="hints")
     separator = Rule(style=const.darker_style)
     hints_list = []
     for hint in hints:
         text = Text(f"{hint.name} ({hint.key})", style="default")
         hints_list.extend([text, separator])
-    panel = Panel(Group(*hints_list), box=const.box_left_rounded, style=const.darker_style)
-    return Layout(panel, size=30)
+    top = Layout(Group(*hints_list))
+    bottom_hints_list = []
+    for bottom_hint in bottom_hints:
+        text = Text(f"{bottom_hint.name} ({bottom_hint.key})", style="default")
+        bottom_hints_list.extend([separator, text])
+    bottom = Layout(Align(Group(*bottom_hints_list, fit=False), vertical="bottom"))
+    hints_layout.split_column(top, bottom)
+    return Layout(Panel(hints_layout, box=const.box_left_rounded, style=const.darker_style), size=30)
 
 
 def get_config_info(config: Config) -> Group:
@@ -94,9 +103,9 @@ def get_schema_output(table: bigquery.Table) -> Group:
     return Group(Rule("Schema", style=const.darker_style), Columns([tree, table]))
 
 
-def get_template_output(template: str) -> Group:
-    syntax = Syntax(template, lexer="SqlJinjaLexer", line_numbers=True)
-    return Group(Rule("Rendered template", style=const.darker_style), syntax)
+def get_snippet_output(snippet: str) -> Group:
+    syntax = Syntax(snippet, lexer="SqlLexer", line_numbers=True, theme="ansi_dark")
+    return Group(Rule("Snippet", style=const.darker_style), syntax)
 
 
 # fmt: off
@@ -133,6 +142,7 @@ def get_table_output(table: bigquery.Table) -> Group:
             "Table expiry": expiry,
             "Data location": table.location,
             "Data location": table.location,
+            "Description": table.description,
         }),
         Rule(style=const.darker_style),
         table_tuple({

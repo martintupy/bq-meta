@@ -1,0 +1,6 @@
+SELECT SUM(count) as duplicates_count FROM (
+  SELECT COUNT(*) - 1 as count
+  FROM `{{project}}.{{dataset}}.{{table}}`
+  GROUP BY id
+  HAVING COUNT(*) > 1
+)

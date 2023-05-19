@@ -1,0 +1,8 @@
+SELECT
+  DATE_TRUNC(PARSE_DATE("%Y%m%d", partition_id), MONTH) AS date,
+  SUM(total_rows) as total_rows,
+  ROUND(SUM(total_logical_bytes/POW(2,40)), 2) AS total_size_TB
+FROM `{{project}}.{{dataset}}.INFORMATION_SCHEMA.PARTITIONS`
+WHERE table_name = '{{table}}' AND partition_id != "__NULL__"
+GROUP by date
+ORDER BY date desc

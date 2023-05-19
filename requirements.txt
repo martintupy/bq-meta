@@ -1,8 +1,0 @@
-Click
-google-auth-oauthlib
-google-cloud-bigquery
-jinja2
-pyperclip
-pyyaml
-readchar
-rich
