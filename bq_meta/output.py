@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 
 from google.cloud import bigquery
@@ -9,7 +10,6 @@ from rich.console import Group, NewLine, RenderableType
 from rich.layout import Layout
 from rich.panel import Panel
 from rich.rule import Rule
-from rich.syntax import Syntax
 from rich.table import Table
 from rich.text import Text
 from rich.tree import Tree
@@ -65,12 +65,21 @@ def list_layout(values: List[str], selected: Optional[str]) -> Layout:
     return Layout(panel, size=30, visible=show)
 
 
-def content_layout(renderable: Optional[RenderableType]) -> Layout:
+def content_panel(renderable: Optional[RenderableType]) -> Panel:
     if renderable:
-        content = Panel(renderable, border_style=const.darker_style)
+        panel = Panel(renderable, border_style=const.darker_style)
     else:
-        content = Panel(NewLine(), border_style=const.darker_style)
-    return Layout(content, name="content")
+        panel = Panel(NewLine(), border_style=const.darker_style)
+    return panel
+
+
+def window_panel(renderable: RenderableType, now: datetime) -> Panel:
+    return Panel(
+        title=now.strftime("%Y-%m-%d %H:%M:%S UTC"),
+        title_align="right",
+        renderable=renderable,
+        border_style=const.border_style,
+    )
 
 
 def hints_layout(hints: List[Hint], bottom_hints: List[Hint]) -> Layout:
@@ -101,11 +110,6 @@ def get_schema_output(table: bigquery.Table) -> Group:
     table_utils.scheme_tree(schema, tree)
     table_utils.scheme_table(schema, table)
     return Group(Rule("Schema", style=const.darker_style), Columns([tree, table]))
-
-
-def get_snippet_output(snippet: str) -> Group:
-    syntax = Syntax(snippet, lexer="SqlLexer", line_numbers=True, theme="ansi_dark")
-    return Group(Rule("Snippet", style=const.darker_style), syntax)
 
 
 # fmt: off

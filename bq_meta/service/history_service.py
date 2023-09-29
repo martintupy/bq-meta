@@ -7,6 +7,7 @@ from bq_meta.util import bash_util
 from google.cloud.bigquery.table import Table, TableReference
 from rich.console import Console
 from rich.live import Live
+from loguru import logger
 
 
 class HistoryService:
@@ -27,6 +28,7 @@ class HistoryService:
         except ValueError:
             pass
         history.append(table.full_table_id)
+        logger.debug(f"Saved table: {table}")
         with open(self.history_path, "w") as f:
             f.write("\n".join(history))
 
@@ -40,4 +42,5 @@ class HistoryService:
             dataset_id = table_ref.dataset_id
             table_id = table_ref.table_id
             table = self.table_service.get_table(project_id, dataset_id, table_id, live)
+        logger.debug(f"Picked table: {table}")
         return table

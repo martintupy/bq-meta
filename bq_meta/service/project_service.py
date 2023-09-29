@@ -1,10 +1,11 @@
 from typing import List
 
+from loguru import logger
+from rich.console import Console
+
 from bq_meta import const
 from bq_meta.client import Client
 from bq_meta.config import Config
-from rich.console import Console
-
 from bq_meta.util.rich_utils import progress
 
 
@@ -24,6 +25,6 @@ class ProjectService:
         iterator = self.client.bq_client.list_projects()
         for project in progress(self.console, "projects", iterator):
             projects_ids.append(project.project_id)
-
+        logger.debug(f"Fetched projects: {projects_ids}")
         with open(self.projects_path, "w") as f:
             f.write("\n".join(projects_ids))

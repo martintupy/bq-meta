@@ -12,6 +12,8 @@ BQ_META_CONFIG = f"{BQ_META_HOME}/config.yaml"
 BQ_META_PROJECTS = f"{BQ_META_HOME}/projects"
 BQ_META_HISTORY = f"{BQ_META_HOME}/history"
 BQ_META_SNIPPETS = f"{BQ_META_HOME}/snippets"
+BQ_META_DEBUG = f"{BQ_META_HOME}/debug.log"
+BQ_META_TRACE = f"{BQ_META_HOME}/trace.log"
 
 BQ_META_DISABLE_COLORS = os.getenv("BQ_META_DISABLE_COLORS", "False").lower() in ("true", "1", "t")
 BQ_META_SKIN = os.getenv("BQ_META_SKIN")

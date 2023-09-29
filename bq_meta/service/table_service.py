@@ -8,6 +8,7 @@ from bq_meta.util.rich_utils import progress
 from google.cloud import bigquery
 from rich.console import Console
 from rich.live import Live
+from loguru import logger
 
 
 class TableService:
@@ -54,6 +55,7 @@ class TableService:
         iterator = self.client.bq_client.list_datasets(project=project_id)
         for dataset in progress(self.console, "datasets", iterator):
             dataset_ids.append(dataset.dataset_id)
+        logger.debug(f"Fetched datasets {dataset_ids}")
         return bash_util.pick_one(dataset_ids, live)
 
     def _pick_table_id(self, project_id: str, dataset_id: str, live: Optional[Live]) -> Optional[str]:
@@ -61,4 +63,5 @@ class TableService:
         iterator = self.client.bq_client.list_tables(f"{project_id}.{dataset_id}")
         for table in progress(self.console, "tables", iterator):
             table_ids.append(table.table_id)
+        logger.debug(f"Fetched tables {table_ids}")
         return bash_util.pick_one(table_ids, live)

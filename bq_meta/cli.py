@@ -18,6 +18,8 @@ from bq_meta.service.snippet_service import SnippetService
 from bq_meta.service.version_service import VersionService
 from bq_meta.util import table_utils
 from bq_meta.window import Window
+from loguru import logger
+import os
 
 
 @click.command()
@@ -26,6 +28,8 @@ from bq_meta.window import Window
 @click.option("--init", help="Initialize 'bq-meta' configuration", is_flag=True)
 @click.option("--info", help="Print info of currently used account", is_flag=True)
 @click.option("--fetch-projects", help="Fetch available google projects", is_flag=True)
+@click.option("--debug", help="Log debug messages into BQ_META_HOME/debug.log", is_flag=True)
+@click.option("--trace", help="Log tace messages into BQ_META_HOME/trace.log", is_flag=True)
 @click.version_option()
 def cli(
     full_table_id: Optional[str],
@@ -33,6 +37,8 @@ def cli(
     init: bool,
     info: bool,
     fetch_projects: bool,
+    debug: bool,
+    trace: bool,
 ):
     """BiqQuery metadata"""
 
@@ -46,7 +52,18 @@ def cli(
     history_service = HistoryService(console, config, table_service)
     window = Window(console, config, history_service, table_service, snippet_service)
     table = None
-    
+
+    logger.remove(0) # disable stdout handler
+    if debug:
+        if os.path.exists(const.BQ_META_DEBUG):
+            os.remove(const.BQ_META_DEBUG)
+        logger.add(const.BQ_META_DEBUG, colorize=True, level="DEBUG")
+
+    if trace:
+        if os.path.exists(const.BQ_META_TRACE):
+            os.remove(const.BQ_META_TRACE)
+        logger.add(const.BQ_META_TRACE, colorize=True, level="TRACE")
+
     if os.path.exists(const.BQ_META_HOME):
         version_service = VersionService()
         version_service.update_config(config)

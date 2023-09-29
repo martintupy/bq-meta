@@ -1,6 +1,9 @@
-from bq_meta.config import Config
-import requests
 from importlib.metadata import version
+
+import requests
+from loguru import logger
+
+from bq_meta.config import Config
 
 
 class VersionService:
@@ -18,6 +21,7 @@ class VersionService:
         url = f"https://pypi.org/pypi/{package}/json"
         response: dict = requests.request("GET", url).json()
         version = response.get("info", None).get("version", None)
+        logger.debug(f"Fetched version: {version}")
         return version
 
     def _get_current_version() -> str:
@@ -26,4 +30,3 @@ class VersionService:
         except:
             ver = None
         return ver
-
