@@ -3,6 +3,7 @@ from typing import Optional
 
 from google.cloud import bigquery
 from jinja2 import Template
+from loguru import logger
 
 from bq_meta import const
 
@@ -23,4 +24,5 @@ class SnippetService:
                     dataset=table.dataset_id,
                     table=table.table_id,
                 )
+        logger.debug(f"Rendered snippet: {const.BQ_META_SNIPPETS}/{snippet}")
         return rendered

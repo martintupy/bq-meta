@@ -17,3 +17,8 @@ def bytes_fmt(bytes_opt: Optional[int]) -> str:
 def num_fmt(num_opt: Optional[int]) -> str:
     num = num_opt if num_opt else 0
     return f"{num:,}"
+
+
+def ms_fmt(milliseconds: int):
+    days = int(milliseconds / (1000 * 60 * 60 * 24))
+    return f"{days} days"

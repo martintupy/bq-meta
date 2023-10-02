@@ -38,3 +38,12 @@ def flash_panel(live: Live, layout: Layout, panel: Panel):
     if not event.is_set():
         panel.border_style = const.border_style
         live.update(layout, refresh=True)
+
+def flash_content(live: Live, layout: Layout, panel: Panel):
+    event = Event()
+    panel.border_style = const.info_style  # border will flash a short period of time
+    live.update(layout, refresh=True)
+    event.wait(0.1)
+    if not event.is_set():
+        panel.border_style = const.border_style
+        live.update(layout, refresh=True)

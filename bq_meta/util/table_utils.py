@@ -26,3 +26,11 @@ def scheme_tree(schema: List[SchemaField], tree: Tree):
 
 def get_properties(table: bigquery.Table) -> str:
     return json.dumps(table._properties, indent=2)
+
+
+def get_schema_json(table: bigquery.Table) -> str:
+    return json.dumps(table._properties.get("schema", {}).get("fields", {}))
+
+
+def get_table_link(table: bigquery.Table) -> str:
+    return f"https://console.cloud.google.com/bigquery?p={table.project}&d={table.dataset_id}&t={table.table_id}&page=table"
