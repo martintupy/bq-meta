@@ -1,10 +1,11 @@
 name: Publish Python distribution to PyPI and TestPyPI
-on: push
+on:
+  release:
+    type: created
 jobs:
   build:
     name: Build distribution
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -23,7 +24,6 @@ jobs:
 
   publish-to-pypi:
     name: Publish Python distribution to PyPI
-    if: startsWith(github.ref, 'refs/tags/') # only publish to PyPI on tag pushes
     needs:
       - build
     runs-on: ubuntu-latest
@@ -31,8 +31,7 @@ jobs:
       name: pypi
       url: https://pypi.org/p/bq-meta
     permissions:
-      id-token: write # IMPORTANT: mandatory for trusted publishing
-
+      id-token: write
     steps:
       - name: Download all the dists
         uses: actions/download-artifact@v3
@@ -47,11 +46,9 @@ jobs:
     needs:
       - publish-to-pypi
     runs-on: ubuntu-latest
-
     permissions:
-      contents: write # IMPORTANT: mandatory for making GitHub Releases
-      id-token: write # IMPORTANT: mandatory for sigstore
-
+      contents: write
+      id-token: write
     steps:
       - name: Download all the dists
         uses: actions/download-artifact@v3
@@ -67,35 +64,4 @@ jobs:
       - name: Upload artifact signatures to GitHub Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        # Upload to GitHub Release using the `gh` CLI.
-        # `dist/` contains the built packages, and the
-        # sigstore-produced signatures and certificates.
-        run: >-
-          gh release upload
-          '${{ github.ref_name }}' dist/**
-          --repo '${{ github.repository }}'
-
-  publish-to-testpypi:
-    name: Publish Python distribution to TestPyPI
-    if: startsWith(github.ref, 'refs/tags/') # only publish to PyPI on tag pushes
-    needs:
-      - build
-    runs-on: ubuntu-latest
-
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/bq-meta
-
-    permissions:
-      id-token: write # IMPORTANT: mandatory for trusted publishing
-
-    steps:
-      - name: Download all the dists
-        uses: actions/download-artifact@v3
-        with:
-          name: python-package-distributions
-          path: dist/
-      - name: Publish distribution to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
+        run: gh release upload '${{ github.ref_name }}' dist/** --repo '${{ github.repository }}'
