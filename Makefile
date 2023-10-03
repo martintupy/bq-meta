@@ -20,3 +20,6 @@ format:
 
 tag:
 	sh bin/tag.sh
+
+tag-dev:
+	sh bin/tag-dev.sh
