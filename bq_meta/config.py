@@ -4,6 +4,7 @@ from typing import List
 import yaml
 
 from bq_meta import const
+from loguru import logger
 
 
 class Config:
@@ -16,7 +17,13 @@ class Config:
                 "token_uri": "https://oauth2.googleapis.com/token",
             }
         },
+        "iam_roles": [
+            "roles/bigquery.dataViewer",
+            "roles/bigquery.dataEditor",
+            "roles/bigquery.dataOwner",
+        ],
         "scopes": [
+            "https://www.googleapis.com/auth/cloud-platform",
             "https://www.googleapis.com/auth/bigquery",
             "https://www.googleapis.com/auth/userinfo.email",
             "openid",
@@ -80,6 +87,15 @@ class Config:
     @current_version.setter
     def current_version(self, current_version: str):
         conf = {**self.conf, "current_version": current_version}
+        self._save_conf(conf)
+
+    @property
+    def iam_roles(self) -> List[str]:
+        return self.conf.get("iam_roles")
+
+    @iam_roles.setter
+    def iam_roles(self, iam_roles: List[str]):
+        conf = {**self.conf, "iam_roles": iam_roles}
         self._save_conf(conf)
 
     @property

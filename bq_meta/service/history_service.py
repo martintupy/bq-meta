@@ -18,10 +18,12 @@ class HistoryService:
         self.history_path = const.BQ_META_HISTORY
 
     def list_tables(self) -> List[str]:
+        logger.trace("Method call")
         projects = open(self.history_path, "r").read().splitlines()
         return projects
 
     def save_table(self, table: Table):
+        logger.trace("Method call")
         history = self.list_tables()
         try:
             history.remove(table.full_table_id)
@@ -33,6 +35,7 @@ class HistoryService:
             f.write("\n".join(history))
 
     def pick_table(self, live: Optional[Live]) -> Optional[Table]:
+        logger.trace("Method call")
         history = self.list_tables()
         from_history = bash_util.pick_one(history, live)
         table = None

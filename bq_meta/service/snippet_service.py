@@ -13,9 +13,11 @@ class SnippetService:
         self.projects_path = const.BQ_META_PROJECTS
 
     def list_snippets(self):
+        logger.trace("Method call")
         return next(os.walk(const.BQ_META_SNIPPETS), (None, None, []))[2]
 
     def get_snippet(self, snippet: str, table: bigquery.Table) -> Optional[str]:
+        logger.trace("Method call")
         rendered = None
         if snippet:
             with open(f"{const.BQ_META_SNIPPETS}/{snippet}") as f:
