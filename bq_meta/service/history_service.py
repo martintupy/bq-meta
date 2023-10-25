@@ -22,6 +22,17 @@ class HistoryService:
         projects = open(self.history_path, "r").read().splitlines()
         return projects
 
+    def purge_tables(self):
+        logger.trace("Method call")
+        history = self.list_tables()
+        new_history = []
+        for table in history:
+            if self.table_service.get_table_str(table.replace(":", ".")):
+                new_history.append(table)
+        with open(self.history_path, "w") as f:
+            f.write("\n".join(new_history))
+        logger.debug("Purged history")
+
     def save_table(self, table: Table):
         logger.trace("Method call")
         history = self.list_tables()
@@ -30,9 +41,20 @@ class HistoryService:
         except ValueError:
             pass
         history.append(table.full_table_id)
-        logger.debug(f"Saved table: {table}")
         with open(self.history_path, "w") as f:
             f.write("\n".join(history))
+        logger.debug(f"Saved table: {table}")
+
+    def remove_table(self, table_ref: str):
+        logger.trace("Method call")
+        history = self.list_tables()
+        try:
+            history.remove(table_ref)
+        except ValueError:
+            pass
+        with open(self.history_path, "w") as f:
+            f.write("\n".join(history))
+        logger.debug(f"Removed table: {table_ref}")
 
     def pick_table(self, live: Optional[Live]) -> Optional[Table]:
         logger.trace("Method call")
@@ -45,5 +67,7 @@ class HistoryService:
             dataset_id = table_ref.dataset_id
             table_id = table_ref.table_id
             table = self.table_service.get_table(project_id, dataset_id, table_id, live)
+            if not table:
+                self.remove_table(from_history)
         logger.debug(f"Picked table: {table}")
         return table

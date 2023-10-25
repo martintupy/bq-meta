@@ -39,12 +39,21 @@ class TableService:
         if dataset_id:
             table_id = table_id if table_id else self._pick_table_id(project_id, dataset_id, live)
         if table_id:
-            table = self.client.bq_client.get_table(f"{project_id}.{dataset_id}.{table_id}")
+            table = self.get_table_str(f"{project_id}.{dataset_id}.{table_id}")
+        return table
+
+    def get_table_str(self, table_str: str) -> Optional[bigquery.Table]:
+        logger.trace("Method call")
+        table = None
+        try:
+            table = self.client.bq_client.get_table(table_str)
+        except Exception:
+            logger.warning(f"Table {table_str} not found")
         return table
 
     def get_fresh_table(self, table: bigquery.Table) -> bigquery.Table:
         logger.trace("Method call")
-        return self.client.bq_client.get_table(f"{table.project}.{table.dataset_id}.{table.table_id}")
+        return self.get_table_str(f"{table.project}.{table.dataset_id}.{table.table_id}")
 
     # ======================   Pick   ======================
 

@@ -29,6 +29,7 @@ import os
 @click.option("--init", help="Initialize 'bq-meta' configuration", is_flag=True)
 @click.option("--info", help="Print info of currently used account", is_flag=True)
 @click.option("--fetch-projects", help="Fetch available google projects", is_flag=True)
+@click.option("--purge-history", help="Remove non existing tables from history", is_flag=True)
 @click.option("--debug", help="Log debug messages into BQ_META_HOME/debug.log", is_flag=True)
 @click.option("--trace", help="Log tace messages into BQ_META_HOME/trace.log", is_flag=True)
 @click.version_option()
@@ -38,6 +39,7 @@ def cli(
     init: bool,
     info: bool,
     fetch_projects: bool,
+    purge_history: bool,
     debug: bool,
     trace: bool,
 ):
@@ -87,6 +89,9 @@ def cli(
         ctx.exit()
     elif fetch_projects:
         project_service.fetch_projects()
+        ctx.exit()
+    elif purge_history:
+        history_service.purge_tables()
         ctx.exit()
     elif full_table_id:
         table_ref = TableReference.from_string(full_table_id.replace(":", "."))

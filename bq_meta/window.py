@@ -13,15 +13,14 @@ from readchar import key
 from rich.console import Console, RenderableType
 from rich.layout import Layout
 from rich.live import Live
-from rich.panel import Panel
 
-from bq_meta import const, output
+from bq_meta import output
 from bq_meta.config import Config
 from bq_meta.service.history_service import HistoryService
 from bq_meta.service.iam_service import IamService
 from bq_meta.service.snippet_service import SnippetService
 from bq_meta.service.table_service import TableService
-from bq_meta.util import bash_util, table_utils
+from bq_meta.util import table_utils
 from bq_meta.util.rich_utils import flash_content, flash_panel
 
 

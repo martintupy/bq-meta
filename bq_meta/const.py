@@ -18,7 +18,7 @@ BQ_META_TRACE = f"{BQ_META_HOME}/trace.log"
 BQ_META_DISABLE_COLORS = os.getenv("BQ_META_DISABLE_COLORS", "False").lower() in ("true", "1", "t")
 BQ_META_SKIN = os.getenv("BQ_META_SKIN")
 
-logger_format = "<level>{level}</level> <fg #0F72CD>{time:YYYY-MM-DD}</fg #0F72CD> <fg #4393DC>{time:HH:mm:ss.SSS}</fg #4393DC> <fg #BD4CBF>{thread.name}</fg #BD4CBF> <fg #D28CCA>{file}:{function}:{line}</fg #D28CCA> - {message}"
+logger_format = "<level>{level: <7}</level> <fg #0F72CD>{time:YYYY-MM-DD}</fg #0F72CD> <fg #4393DC>{time:HH:mm:ss.SSS}</fg #4393DC> <fg #BD4CBF>{thread.name}</fg #BD4CBF> <fg #D28CCA>{file}:{function}:{line}</fg #D28CCA> - {message}"
 
 default_skin = {
     "request": "gold3",
