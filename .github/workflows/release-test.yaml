@@ -27,6 +27,7 @@ jobs:
 
   publish-to-test-pypi:
     name: Publish distribution to TestPyPI
+    if: github.ref_type == 'tag'
     needs:
       - build
     runs-on: ubuntu-latest
