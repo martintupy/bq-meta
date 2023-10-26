@@ -3,10 +3,14 @@ on: push
 jobs:
   build:
     name: Build distribution
-    if: github.ref_type == 'tag' && contains(github.ref_name, '+') # when tag contains build metadata
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Update version
+        run: |
+          VERSION=$(cat VERSION | cut -d '+' -f1)
+          REV_SHORT=$(git rev-parse --short HEAD)
+          echo -n "$VERSION+$REV_SHORT" > VERSION
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
