@@ -1,16 +1,14 @@
 name: Release to TestPyPI
-on: push
+on:
+  push:
+    tags:
+      - "*"
 jobs:
   build:
     name: Build distribution
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Update version
-        run: |
-          VERSION=$(cat VERSION | cut -d '+' -f1)
-          REV_SHORT=$(git rev-parse --short HEAD)
-          echo -n "$VERSION+$REV_SHORT" > VERSION
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -24,10 +22,9 @@ jobs:
         with:
           name: python-package-distributions
           path: dist/
-
+          
   publish-to-test-pypi:
     name: Publish distribution to TestPyPI
-    if: github.ref_type == 'tag'
     needs:
       - build
     runs-on: ubuntu-latest

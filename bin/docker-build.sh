@@ -5,7 +5,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 python3 -m build
 
-VERSION=$(cat setup.cfg | grep "version =" | cut -d = -f 2 | xargs)
+VERSION=$(cat VERSION)
 
 docker build . \
   --build-arg version=$VERSION \
