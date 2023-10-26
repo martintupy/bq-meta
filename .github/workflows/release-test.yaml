@@ -1,9 +1,11 @@
 name: Release to TestPyPI
-on: push
+on:
+  push:
+    tags:
+      - "*"
 jobs:
   build:
     name: Build distribution
-    if: github.ref_type == 'tag' && contains(github.ref_name, '+') # when tag contains build metadata
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,7 +22,7 @@ jobs:
         with:
           name: python-package-distributions
           path: dist/
-
+          
   publish-to-test-pypi:
     name: Publish distribution to TestPyPI
     needs:

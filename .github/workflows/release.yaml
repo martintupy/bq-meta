@@ -1,7 +1,8 @@
 name: Release to PyPI
 on:
   release:
-    type: created
+    types:
+      - published
 jobs:
   build:
     name: Build distribution
