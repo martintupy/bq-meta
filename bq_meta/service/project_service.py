@@ -17,10 +17,12 @@ class ProjectService:
         self.projects_path = const.BQ_META_PROJECTS
 
     def list_projects(self) -> List[str]:
+        logger.trace("Method call")
         projects = open(self.projects_path, "r").read().splitlines()
         return projects
 
     def fetch_projects(self):
+        logger.trace("Method call")
         projects_ids = ["bigquery-public-data"]  # add bq public datasets explicitly, for testing purposes
         iterator = self.client.bq_client.list_projects()
         for project in progress(self.console, "projects", iterator):

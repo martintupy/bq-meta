@@ -12,6 +12,7 @@ from bq_meta.client import Client
 from bq_meta.config import Config
 from bq_meta.initialize import initialize
 from bq_meta.service.history_service import HistoryService
+from bq_meta.service.iam_service import IamService
 from bq_meta.service.project_service import ProjectService
 from bq_meta.service.table_service import TableService
 from bq_meta.service.snippet_service import SnippetService
@@ -28,6 +29,7 @@ import os
 @click.option("--init", help="Initialize 'bq-meta' configuration", is_flag=True)
 @click.option("--info", help="Print info of currently used account", is_flag=True)
 @click.option("--fetch-projects", help="Fetch available google projects", is_flag=True)
+@click.option("--purge-history", help="Remove non existing tables from history", is_flag=True)
 @click.option("--debug", help="Log debug messages into BQ_META_HOME/debug.log", is_flag=True)
 @click.option("--trace", help="Log tace messages into BQ_META_HOME/trace.log", is_flag=True)
 @click.version_option()
@@ -37,6 +39,7 @@ def cli(
     init: bool,
     info: bool,
     fetch_projects: bool,
+    purge_history: bool,
     debug: bool,
     trace: bool,
 ):
@@ -50,23 +53,23 @@ def cli(
     table_service = TableService(console, config, client, project_service)
     snippet_service = SnippetService()
     history_service = HistoryService(console, config, table_service)
-    window = Window(console, config, history_service, table_service, snippet_service)
+    iam_service = IamService(console, config, client)
+    window = Window(console, config, history_service, table_service, snippet_service, iam_service)
     table = None
 
-    logger.remove(0) # disable stdout handler
+    logger.remove(0)  # disable stdout handler
+    logger.level("DEBUG", color="<fg #008720>")
+    logger.level("TRACE", color="<fg #6CEC16>")
     if debug:
-        if os.path.exists(const.BQ_META_DEBUG):
-            os.remove(const.BQ_META_DEBUG)
-        logger.add(const.BQ_META_DEBUG, colorize=True, level="DEBUG")
-
+        logger.add(const.BQ_META_DEBUG, colorize=True, level="DEBUG", rotation="1 MB", format=const.logger_format)
     if trace:
-        if os.path.exists(const.BQ_META_TRACE):
-            os.remove(const.BQ_META_TRACE)
-        logger.add(const.BQ_META_TRACE, colorize=True, level="TRACE")
+        logger.add(const.BQ_META_TRACE, colorize=True, level="TRACE", rotation="1 MB", format=const.logger_format)
 
     if os.path.exists(const.BQ_META_HOME):
         version_service = VersionService()
         version_service.update_config(config)
+
+    logger.debug(f"Loaded config: {config.conf}")
 
     if init:
         initialize(config, console, project_service)
@@ -86,6 +89,9 @@ def cli(
         ctx.exit()
     elif fetch_projects:
         project_service.fetch_projects()
+        ctx.exit()
+    elif purge_history:
+        history_service.purge_tables()
         ctx.exit()
     elif full_table_id:
         table_ref = TableReference.from_string(full_table_id.replace(":", "."))

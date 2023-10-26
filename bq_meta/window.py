@@ -13,14 +13,14 @@ from readchar import key
 from rich.console import Console, RenderableType
 from rich.layout import Layout
 from rich.live import Live
-from rich.panel import Panel
 
-from bq_meta import const, output
+from bq_meta import output
 from bq_meta.config import Config
 from bq_meta.service.history_service import HistoryService
+from bq_meta.service.iam_service import IamService
 from bq_meta.service.snippet_service import SnippetService
 from bq_meta.service.table_service import TableService
-from bq_meta.util import bash_util, table_utils
+from bq_meta.util import table_utils
 from bq_meta.util.rich_utils import flash_content, flash_panel
 
 
@@ -30,6 +30,8 @@ class View(Enum):
     schema = 3
     snippets = 4
     metadata = 5
+    iam = 6
+    error = 7
 
 
 class Metadata(Enum):
@@ -48,7 +50,8 @@ hint_open = Hint("o", "Open new table")
 hint_table = Hint("t", "Show table")
 hint_schema = Hint("s", "Show schema")
 hint_snippets = Hint("p", "Show snippets")
-hint_metadata = Hint("c", "Show metadata")
+hint_metadata = Hint("m", "Show metadata")
+hint_iam = Hint("i", "Show iam")
 hint_history = Hint("h", "Show history")
 hint_open_browser = Hint("b", "Open in browser")
 
@@ -63,6 +66,7 @@ all_hints = [
     hint_schema,
     hint_snippets,
     hint_metadata,
+    hint_iam,
     hint_history,
 ]
 
@@ -75,12 +79,14 @@ class Window:
         history_service: HistoryService,
         table_service: TableService,
         snippet_service: SnippetService,
+        iam_service: IamService,
     ):
         self.console = console
         self.config = config
         self.history_service = history_service
         self.table_service = table_service
         self.snippet_service = snippet_service
+        self.iam_service = iam_service
         self.table: Optional[bigquery.Table] = None
         self.project_id: Optional[str] = None
         self.dataset_id: Optional[str] = None
@@ -128,6 +134,11 @@ class Window:
                     self.content = table_utils.get_table_link(self.table)
                 elif self.selected_value == Metadata.schema.name:
                     self.content = table_utils.get_schema_json(self.table)
+            case View.iam if self.table:
+                self.hints = all_hints
+                self.bottom_hints = [hint_refresh, hint_copy, hint_quit]
+                members = self.iam_service.get_role_members(self.table, self.selected_value)
+                self.content = output.get_members_output(members)
 
     def _update_panel(self, live: Live) -> None:
         window_layout = Layout(name="window")
@@ -225,16 +236,17 @@ class Window:
                 webbrowser.open(url)
 
             # Copy
-            case "c" if self.table and self.view in [View.metadata, View.snippets]:
+            case "c" if self.table:
                 logger.trace(f"Pressed 'c' ({hint_copy.name})")
-                flash_content(live, self.layout, self.content_panel)
-                pyperclip.copy(self.content)
-
-            # Copy table
-            case "c" if self.table and self.view == View.table:
-                logger.trace(f"Pressed 'c' ({hint_copy.name})")
-                flash_content(live, self.layout, self.content_panel)
-                pyperclip.copy(table_utils.get_properties(self.table))
+                copy_content = None
+                match self.view:
+                    case View.metadata | View.snippets | View.iam:
+                        copy_content = self.content
+                    case View.table:
+                        copy_content = table_utils.get_properties(self.table)
+                if copy_content:
+                    flash_content(live, self.layout, self.content_panel)
+                    pyperclip.copy(copy_content)
 
             # Show metadata
             case "m" if self.table:
@@ -242,6 +254,18 @@ class Window:
                 self.view = View.metadata
                 self.values = [Metadata.table_id.name, Metadata.link.name, Metadata.schema.name]
                 self.selected_value = Metadata.table_id.name
+
+            # Show iam
+            case "i" if self.table:
+                logger.trace(f"Pressed 'i' ({hint_iam.name})")
+                iam_result = self.iam_service.fetch_all_roles_members(self.table, self.config.iam_roles)
+                if iam_result:
+                    self.view = View.iam
+                    self.values = self.config.iam_roles
+                    self.selected_value = self.config.iam_roles[0]
+                else:
+                    self.view = View.error
+                    self.content = output.get_missing_assets_permission_output(self.config, self.table)
 
             # Show snippets view
             case "p" if self.table:

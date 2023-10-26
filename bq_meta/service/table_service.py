@@ -31,6 +31,7 @@ class TableService:
         table_id: Optional[str] = None,
         live: Optional[Live] = None,
     ) -> Optional[bigquery.Table]:
+        logger.trace("Method call")
         table = None
         project_id = project_id if project_id else self._pick_project_id(live)
         if project_id:
@@ -38,19 +39,31 @@ class TableService:
         if dataset_id:
             table_id = table_id if table_id else self._pick_table_id(project_id, dataset_id, live)
         if table_id:
-            table = self.client.bq_client.get_table(f"{project_id}.{dataset_id}.{table_id}")
+            table = self.get_table_str(f"{project_id}.{dataset_id}.{table_id}")
+        return table
+
+    def get_table_str(self, table_str: str) -> Optional[bigquery.Table]:
+        logger.trace("Method call")
+        table = None
+        try:
+            table = self.client.bq_client.get_table(table_str)
+        except Exception:
+            logger.warning(f"Table {table_str} not found")
         return table
 
     def get_fresh_table(self, table: bigquery.Table) -> bigquery.Table:
-        return self.client.bq_client.get_table(f"{table.project}.{table.dataset_id}.{table.table_id}")
+        logger.trace("Method call")
+        return self.get_table_str(f"{table.project}.{table.dataset_id}.{table.table_id}")
 
     # ======================   Pick   ======================
 
     def _pick_project_id(self, live: Optional[Live]) -> Optional[str]:
+        logger.trace("Method call")
         project_ids = self.project_service.list_projects()
         return bash_util.pick_one(project_ids, live)
 
     def _pick_dataset_id(self, project_id: str, live: Optional[Live]) -> Optional[str]:
+        logger.trace("Method call")
         dataset_ids = []
         iterator = self.client.bq_client.list_datasets(project=project_id)
         for dataset in progress(self.console, "datasets", iterator):
@@ -59,6 +72,7 @@ class TableService:
         return bash_util.pick_one(dataset_ids, live)
 
     def _pick_table_id(self, project_id: str, dataset_id: str, live: Optional[Live]) -> Optional[str]:
+        logger.trace("Method call")
         table_ids = []
         iterator = self.client.bq_client.list_tables(f"{project_id}.{dataset_id}")
         for table in progress(self.console, "tables", iterator):

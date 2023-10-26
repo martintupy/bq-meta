@@ -62,7 +62,7 @@ def list_layout(values: List[str], selected: Optional[str]) -> Layout:
                 text = Text(f"  {value}", style="default")
             values_list.extend([text, separator])
         panel = Panel(Group(*values_list), box=const.box_right_rounded, style=const.darker_style)
-    return Layout(panel, size=30, visible=show)
+    return Layout(panel, size=32, visible=show)
 
 
 def content_panel(renderable: Optional[RenderableType]) -> Panel:
@@ -205,3 +205,37 @@ def text_tuple(name: str, value) -> Text:
     else:
         text = Text(str(value), style="default")
     return Text(name, style=const.key_style).append(" = ", style=const.darker_style).append(text)
+
+
+def get_members_output(members: List[str]) -> Text:
+    text = ""
+    for member in members:
+        text = text + f"{member}\n"
+    return text
+
+
+def get_missing_assets_permission_output(config: Config, table: bigquery.Table) -> Text:
+    message = """
+User does not have permission to use Asset Inventory API 
+https://cloud.google.com/asset-inventory/docs/access-control#required_permissions
+"""
+    error = Panel(
+        title="Missing permission",
+        padding=(0, 3),
+        renderable=message,
+        expand=False,
+        border_style=const.error_style,
+    )
+    message = f"""
+Role: roles/cloudasset.viewer
+User: {config.account}
+Scope: projects/{table.project}
+"""
+    suggest = Panel(
+        title="Suggested role assignment",
+        padding=(0, 3),
+        renderable=message,
+        expand=False,
+        border_style=const.request_style,
+    )
+    return Group(Align(error, align="center"), Align(suggest, align="center"))
